@@ -3,707 +3,1329 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fortnite — Panel Estratégico</title>
+<title>Fortnite Analytics — Panel Estrategico</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
-  :root {
-    --bg: #080c14;
-    --surface: #0d1420;
-    --card: #111827;
-    --border: #1e2d45;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --accent3: #f59e0b;
-    --cluster0: #3b82f6;
-    --cluster1: #a855f7;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --glow: 0 0 20px rgba(0,212,255,0.15);
-  }
+:root {
+  --bg:       #03080f;
+  --surface:  #070f1c;
+  --card:     #0a1525;
+  --card2:    #0d1b2e;
+  --border:   #142235;
+  --border2:  #1c3050;
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  --fn-sky:   #4ec9e8;
+  --fn-blue:  #1e90d6;
+  --fn-white: #e8f4ff;
+  --fn-ice:   #a8d8f0;
+  --fn-storm: #2d6fa8;
+  --fn-dark:  #0a2040;
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    background-image:
-      radial-gradient(ellipse at 10% 0%, rgba(0,212,255,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 100%, rgba(124,58,237,0.06) 0%, transparent 50%);
-  }
+  --grad-main: linear-gradient(135deg, #4ec9e8, #1e90d6, #9dd6f0);
+  --grad-card: linear-gradient(135deg, #0a1525, #0d1b2e);
+  --grad-glow: radial-gradient(ellipse at top, rgba(78,201,232,0.08), transparent 60%);
 
-  /* HEADER */
-  header {
-    background: linear-gradient(135deg, #080c14 0%, #0d1a2e 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
+  --text:   #cde8f8;
+  --muted:  #4a6f8a;
+  --dim:    #243a52;
 
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 0 16px rgba(0,212,255,0.4);
-  }
+  --accent:  #4ec9e8;
+  --accent2: #1e90d6;
+  --hot:     #00e5ff;
+}
 
-  header h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    background: linear-gradient(90deg, var(--accent), #fff, var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  .header-sub {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-left: auto;
-  }
+html { scroll-behavior: smooth; }
 
-  .badge {
-    background: rgba(0,212,255,0.1);
-    border: 1px solid rgba(0,212,255,0.3);
-    color: var(--accent);
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(78,201,232,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 30% at 80% 100%, rgba(30,144,214,0.05) 0%, transparent 50%);
+}
 
-  /* LAYOUT */
-  main {
-    padding: 24px 28px;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
+/* ─── TOPBAR ─── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(3,8,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 28px;
+  height: 58px;
+}
 
-  /* KPI CARDS */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-  }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 36px;
+}
 
-  .kpi-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 20px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
-  }
+.brand-mark {
+  width: 32px; height: 32px;
+  background: var(--grad-main);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: #03080f;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: -1px;
+  flex-shrink: 0;
+}
 
-  .kpi-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--glow);
-  }
+.brand-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  height: 100%;
+}
 
-  .kpi-label {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0 20px;
+  cursor: pointer;
+  height: 100%;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
 
-  .kpi-value {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1;
-    background: linear-gradient(135deg, #fff, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+.tab-btn:hover { color: var(--fn-ice); }
 
-  .kpi-unit {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(78,201,232,0.04);
+}
 
-  .kpi-icon {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 28px;
-    opacity: 0.15;
-  }
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  /* CHART GRID */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+.badge-pill {
+  background: rgba(78,201,232,0.08);
+  border: 1px solid rgba(78,201,232,0.2);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
-  .charts-row3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+/* ─── PAGES ─── */
+.page { display: none; }
+.page.active { display: block; }
 
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
-  }
+/* ─── DASHBOARD PAGE ─── */
+.dash-main {
+  padding: 22px 28px 32px;
+  max-width: 1560px;
+  margin: 0 auto;
+}
 
-  .chart-card:hover {
-    border-color: rgba(0,212,255,0.3);
-  }
+.section-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .chart-card.wide {
-    grid-column: 1 / -1;
-  }
+.section-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 16px; height: 2px;
+  background: var(--grad-main);
+  border-radius: 2px;
+}
 
-  .chart-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
+/* KPIs */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
 
-  .chart-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
+.kpi {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  cursor: default;
+}
 
-  .chart-wrap {
-    position: relative;
-    height: 240px;
-  }
+.kpi::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--grad-main);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
 
-  .chart-wrap.tall {
-    height: 280px;
-  }
+.kpi:hover { border-color: var(--border2); box-shadow: 0 0 24px rgba(78,201,232,0.08); }
+.kpi:hover::after { opacity: 1; }
 
-  /* DONUTS ROW */
-  .donuts-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
+.kpi-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
 
-  .donut-half {
-    padding: 14px 16px;
-    border-right: 1px solid var(--border);
-  }
+.kpi-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--fn-white), var(--fn-sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .donut-half:last-child { border-right: none; }
+.kpi-sub {
+  font-size: 10px;
+  color: var(--dim);
+  margin-top: 4px;
+}
 
-  .donut-label {
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: center;
-    margin-bottom: 8px;
-  }
+.kpi-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--border);
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
 
-  .donut-wrap {
-    height: 180px;
-    position: relative;
-  }
+.kpi-bar-fill {
+  height: 100%;
+  background: var(--grad-main);
+  border-radius: 2px;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
 
-  /* INSIGHT CARDS */
-  .insights-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 16px;
-  }
+/* Charts grid */
+.charts-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
 
-  .insight-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 20px;
-    position: relative;
-    overflow: hidden;
-  }
+.charts-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
 
-  .insight-card::before {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-  }
+.chart-card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  transition: border-color 0.2s;
+}
 
-  .insight-card:nth-child(1)::before { background: var(--accent); }
-  .insight-card:nth-child(2)::before { background: var(--accent2); }
-  .insight-card:nth-child(3)::before { background: var(--accent3); }
+.chart-card:hover { border-color: var(--border2); }
 
-  .insight-num {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
+.chart-head {
+  margin-bottom: 14px;
+}
 
-  .insight-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
+.chart-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--fn-sky);
+}
 
-  .insight-card:nth-child(1) .insight-title { color: var(--accent); }
-  .insight-card:nth-child(2) .insight-title { color: #c084fc; }
-  .insight-card:nth-child(3) .insight-title { color: var(--accent3); }
+.chart-desc {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
-  .insight-text {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 260px; }
 
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+/* Donut card split */
+.donut-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  margin-top: 10px;
+}
 
-  .filter-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+.donut-half {
+  padding: 10px 14px;
+}
 
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: 'Inter', sans-serif;
-  }
+.donut-half:first-child {
+  border-right: 1px solid var(--border);
+}
 
-  .filter-btn.active, .filter-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,212,255,0.08);
-  }
+.donut-lbl {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 6px;
+}
 
-  .section-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
+.donut-wrap { height: 160px; position: relative; }
 
-  footer {
-    text-align: center;
-    padding: 20px;
-    color: var(--muted);
-    font-size: 11px;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-  }
+/* Insights row */
+.insights-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.insight-card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+}
+
+.insight-card:nth-child(1)::before { background: var(--fn-sky); }
+.insight-card:nth-child(2)::before { background: var(--fn-blue); }
+.insight-card:nth-child(3)::before { background: var(--fn-ice); }
+
+.insight-num {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.insight-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 7px;
+  color: var(--fn-white);
+}
+
+.insight-text {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ─── PREDICTOR PAGE ─── */
+.pred-main {
+  padding: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pred-hero {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.pred-hero h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.pred-hero p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.pred-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.pred-form-card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px;
+}
+
+.pred-form-card h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--fn-sky);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-val-display {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.field-input {
+  width: 100%;
+  background: rgba(78,201,232,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(78,201,232,0.1);
+}
+
+.field-range {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border2);
+  outline: none;
+  margin-top: 2px;
+}
+
+.field-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--grad-main);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(78,201,232,0.5);
+  transition: box-shadow 0.2s;
+}
+
+.field-range::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(78,201,232,0.8);
+}
+
+.pred-btn {
+  width: 100%;
+  margin-top: 20px;
+  background: linear-gradient(135deg, var(--fn-sky), var(--fn-blue));
+  border: none;
+  border-radius: 8px;
+  color: #03080f;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.pred-btn:hover { opacity: 0.9; box-shadow: 0 0 24px rgba(78,201,232,0.35); }
+.pred-btn:active { transform: scale(0.98); }
+
+/* Results panel */
+.pred-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-card {
+  background: var(--grad-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  transition: border-color 0.3s;
+}
+
+.result-card.highlighted {
+  border-color: var(--accent);
+  box-shadow: 0 0 32px rgba(78,201,232,0.1);
+}
+
+.result-card h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.result-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.result-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: all 0.4s;
+}
+
+.result-unit {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.result-sub {
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.profile-badge.competitive {
+  background: rgba(78,201,232,0.1);
+  border: 1px solid rgba(78,201,232,0.3);
+  color: var(--fn-sky);
+}
+
+.profile-badge.base {
+  background: rgba(30,144,214,0.1);
+  border: 1px solid rgba(30,144,214,0.3);
+  color: var(--fn-blue);
+}
+
+.perf-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-right: 8px;
+}
+
+.perf-high {
+  background: rgba(78,201,232,0.12);
+  border: 1px solid rgba(78,201,232,0.25);
+  color: var(--fn-sky);
+}
+
+.perf-normal {
+  background: rgba(30,144,214,0.1);
+  border: 1px solid rgba(30,144,214,0.2);
+  color: var(--fn-blue);
+}
+
+.mini-bars {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mini-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+}
+
+.mini-bar-label {
+  color: var(--muted);
+  width: 90px;
+  text-align: right;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.mini-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--fn-blue), var(--fn-sky));
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+.mini-bar-val {
+  color: var(--text);
+  width: 50px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--dim);
+}
+
+.empty-state .es-icon {
+  width: 56px; height: 56px;
+  margin: 0 auto 14px;
+  background: var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state .es-line {
+  width: 20px; height: 2px;
+  background: var(--muted);
+  margin: 5px auto;
+  border-radius: 2px;
+}
+
+.empty-state p {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+}
+
+/* Chart legend custom */
+.custom-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.leg-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Confidence bar */
+.conf-wrap {
+  margin-top: 12px;
+}
+
+.conf-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 5px;
+  letter-spacing: 0.5px;
+}
+
+.conf-track {
+  height: 6px;
+  background: var(--border2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.conf-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--fn-blue), var(--fn-sky), var(--fn-white));
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+footer {
+  text-align: center;
+  padding: 18px;
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border);
+  text-transform: uppercase;
+  margin-top: 16px;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-icon">⚡</div>
-  <h1>Panel Estratégico — Fortnite</h1>
-  <span class="header-sub">Modelo ML · CRISP-DM</span>
-  <span class="badge">1.435 jugadores</span>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">FN</div>
+    <span class="brand-name">Fortnite Analytics</span>
+  </div>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('predictor', this)">Predictor de Jugador</button>
+  </nav>
+  <div class="topbar-right">
+    <span class="badge-pill">1.435 Jugadores</span>
+  </div>
 </header>
 
-<main>
+<!-- ════════════════════════════════════════
+     TAB 1: DASHBOARD
+════════════════════════════════════════ -->
+<div id="page-dashboard" class="page active">
+<div class="dash-main">
 
   <!-- KPIs -->
-  <p class="section-title">Indicadores Clave de Rendimiento</p>
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-label">Kills Promedio</div>
-      <div class="kpi-value">43.245</div>
-      <div class="kpi-unit">Total kills por jugador</div>
-      <div class="kpi-icon">🎯</div>
+  <p class="section-eyebrow">Indicadores clave · Promedio por jugador</p>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Kills Totales</div>
+      <div class="kpi-val" id="kpi1">43.245</div>
+      <div class="kpi-sub">Promedio por jugador</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%"></div></div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Win Ratio Promedio</div>
-      <div class="kpi-value">7,61%</div>
-      <div class="kpi-unit">Tasa de victoria global</div>
-      <div class="kpi-icon">🏆</div>
+    <div class="kpi">
+      <div class="kpi-label">Win Ratio</div>
+      <div class="kpi-val" id="kpi2">7,61%</div>
+      <div class="kpi-sub">Tasa de victoria global</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:38%"></div></div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Partidas Promedio</div>
-      <div class="kpi-value">22.933</div>
-      <div class="kpi-unit">Partidas totales por jugador</div>
-      <div class="kpi-icon">🎮</div>
+    <div class="kpi">
+      <div class="kpi-label">Partidas Jugadas</div>
+      <div class="kpi-val" id="kpi3">22.933</div>
+      <div class="kpi-sub">Partidas totales por jugador</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:55%"></div></div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi">
       <div class="kpi-label">Minutos Jugados</div>
-      <div class="kpi-value">155.522</div>
-      <div class="kpi-unit">Promedio por jugador</div>
-      <div class="kpi-icon">⏱️</div>
+      <div class="kpi-val" id="kpi4">155.522</div>
+      <div class="kpi-sub">Promedio por jugador</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:48%"></div></div>
     </div>
   </div>
 
-  <!-- FILA 1: Perfiles + Scatter -->
-  <p class="section-title">Distribución de Jugadores & Modelo Predictivo</p>
-  <div class="charts-grid" style="margin-bottom:16px;">
+  <!-- ROW 1 -->
+  <p class="section-eyebrow">Distribucion de perfiles y modelo predictivo</p>
+  <div class="charts-2col" style="margin-bottom:12px;">
 
     <div class="chart-card">
-      <div class="chart-title">Distribución de Perfiles</div>
-      <div class="chart-sub">Cantidad de jugadores por perfil de cluster</div>
-      <div class="chart-wrap">
-        <canvas id="perfilChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Distribucion de Perfiles de Jugador</div>
+        <div class="chart-desc">Cantidad de jugadores por cluster asignado</div>
       </div>
+      <div class="chart-wrap"><canvas id="cPerfil"></canvas></div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-title">Kills Reales vs Predichas</div>
-      <div class="chart-sub">Validación del modelo de regresión por cluster</div>
-      <div class="chart-wrap">
-        <canvas id="scatterChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Kills Reales vs Kills Predichas</div>
+        <div class="chart-desc">Validacion del modelo de regresion — cada punto es un jugador</div>
+      </div>
+      <div class="chart-wrap"><canvas id="cScatter"></canvas></div>
+      <div class="custom-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#4ec9e8"></div>Cluster 0 — Base activa</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#1e90d6"></div>Cluster 1 — Perfil competitivo</div>
       </div>
     </div>
 
   </div>
 
-  <!-- FILA 2: Donuts + Engagement + Kills -->
-  <p class="section-title">Rendimiento Real vs Predicho & Engagement</p>
-  <div class="charts-row3" style="margin-bottom:16px;">
+  <!-- ROW 2 -->
+  <p class="section-eyebrow">Rendimiento real vs predicho y engagement</p>
+  <div class="charts-3col" style="margin-bottom:12px;">
 
     <div class="chart-card">
-      <div class="chart-title">Rendimiento Real vs Predicho</div>
-      <div class="chart-sub">Comparación del modelo de clasificación</div>
-      <div class="donuts-row">
+      <div class="chart-head">
+        <div class="chart-title">Rendimiento: Real vs Predicho</div>
+        <div class="chart-desc">Clasificacion del modelo vs datos reales</div>
+      </div>
+      <div class="donut-split">
         <div class="donut-half">
-          <div class="donut-label">Real</div>
-          <div class="donut-wrap">
-            <canvas id="donutReal"></canvas>
-          </div>
+          <div class="donut-lbl">Real</div>
+          <div class="donut-wrap"><canvas id="cDonutR"></canvas></div>
         </div>
         <div class="donut-half">
-          <div class="donut-label">Predicho</div>
-          <div class="donut-wrap">
-            <canvas id="donutPred"></canvas>
-          </div>
+          <div class="donut-lbl">Predicho</div>
+          <div class="donut-wrap"><canvas id="cDonutP"></canvas></div>
         </div>
       </div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-title">Win Ratio por Cluster</div>
-      <div class="chart-sub">Promedio de win ratio según engagement</div>
-      <div class="chart-wrap">
-        <canvas id="clusterChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Win Ratio por Cluster y Engagement</div>
+        <div class="chart-desc">Promedio de tasa de victoria segun segmento</div>
       </div>
+      <div class="chart-wrap"><canvas id="cCluster"></canvas></div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-title">Kills por Partida</div>
-      <div class="chart-sub">Promedio según estado de rendimiento</div>
-      <div class="chart-wrap">
-        <canvas id="killsChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Kills por Partida segun Rendimiento</div>
+        <div class="chart-desc">Diferencia de efectividad entre perfiles</div>
       </div>
+      <div class="chart-wrap"><canvas id="cKills"></canvas></div>
     </div>
 
   </div>
 
-  <!-- FILA 3: Minutos + Matriz -->
-  <p class="section-title">Actividad y Matriz Estratégica</p>
-  <div class="charts-grid" style="margin-bottom:24px;">
+  <!-- ROW 3 -->
+  <p class="section-eyebrow">Actividad temporal y matriz estrategica</p>
+  <div class="charts-2col" style="margin-bottom:20px;">
 
     <div class="chart-card">
-      <div class="chart-title">Minutos Jugados por Perfil</div>
-      <div class="chart-sub">Tiempo total promedio de actividad</div>
-      <div class="chart-wrap">
-        <canvas id="minutesChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Minutos Jugados por Perfil</div>
+        <div class="chart-desc">Tiempo total promedio de actividad acumulada</div>
       </div>
+      <div class="chart-wrap"><canvas id="cMinutes"></canvas></div>
     </div>
 
     <div class="chart-card">
-      <div class="chart-title">Matriz Engagement × Rendimiento</div>
-      <div class="chart-sub">Score promedio por combinación estratégica</div>
-      <div class="chart-wrap">
-        <canvas id="matrizChart"></canvas>
+      <div class="chart-head">
+        <div class="chart-title">Matriz Engagement x Rendimiento</div>
+        <div class="chart-desc">Score promedio por combinacion estrategica</div>
       </div>
+      <div class="chart-wrap"><canvas id="cMatriz"></canvas></div>
     </div>
 
   </div>
 
-  <!-- SOLUCIONES ESTRATÉGICAS -->
-  <p class="section-title">Soluciones Estratégicas</p>
-  <div class="insights-grid">
+  <!-- INSIGHTS -->
+  <p class="section-eyebrow">Soluciones estrategicas</p>
+  <div class="insights-row">
     <div class="insight-card">
-      <div class="insight-num">Solución 01</div>
-      <div class="insight-title">Reactivación de Bajo Engagement</div>
-      <div class="insight-text">El 24,9% de jugadores presenta bajo engagement. Diseñar campañas de reactivación con recompensas exclusivas, misiones personalizadas y notificaciones dirigidas a este segmento puede recuperar hasta un 30% de jugadores inactivos.</div>
+      <div class="insight-num">Solucion 01</div>
+      <div class="insight-title">Reactivacion de Bajo Engagement</div>
+      <div class="insight-text">El 24,9% de jugadores presenta bajo engagement. Campanas de reactivacion con recompensas exclusivas, misiones personalizadas y notificaciones dirigidas pueden recuperar hasta un 30% de jugadores inactivos del segmento de bajo engagement.</div>
     </div>
     <div class="insight-card">
-      <div class="insight-num">Solución 02</div>
-      <div class="insight-title">Liga de Alto Rendimiento</div>
-      <div class="insight-text">El Cluster 1 (perfil competitivo) tiene un win ratio de 12.47% vs 5.28% del Cluster 0. Crear torneos exclusivos, rankings y recompensas especiales para este segmento maximiza la retención de los jugadores más valiosos.</div>
+      <div class="insight-num">Solucion 02</div>
+      <div class="insight-title">Liga Competitiva por Cluster</div>
+      <div class="insight-text">El Cluster 1 tiene un win ratio de 12,47% frente al 5,28% del Cluster 0. Crear torneos, rankings y recompensas para jugadores del perfil competitivo maximiza la retencion del segmento de mayor valor y genera competencia saludable.</div>
     </div>
     <div class="insight-card">
-      <div class="insight-num">Solución 03</div>
-      <div class="insight-title">Matchmaking Personalizado por Perfil</div>
-      <div class="insight-text">El modelo predice con alta precisión el perfil de cada jugador (24.11% vs 25.02% alto rendimiento real/predicho). Adaptar el matchmaking, dificultad y recompensas según el Perfil_Cluster mejora la experiencia y reduce la tasa de abandono.</div>
+      <div class="insight-num">Solucion 03</div>
+      <div class="insight-title">Matchmaking Personalizado</div>
+      <div class="insight-text">El modelo predice el perfil con alta precision (24,1% vs 25,0% de alto rendimiento real/predicho). Adaptar el matchmaking y la dificultad segun el Perfil_Cluster mejora la experiencia por segmento y reduce la tasa de abandono global.</div>
     </div>
   </div>
 
-</main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB 2: PREDICTOR
+════════════════════════════════════════ -->
+<div id="page-predictor" class="page">
+<div class="pred-main">
+
+  <div class="pred-hero">
+    <h2>Predictor de Jugador</h2>
+    <p>Ingresa las estadisticas de un jugador y el modelo calculara su perfil de cluster, rendimiento esperado y kills predichas basandose en los patrones aprendidos del dataset.</p>
+  </div>
+
+  <div class="pred-layout">
+
+    <!-- FORM -->
+    <div class="pred-form-card">
+      <h3>Estadisticas del Jugador</h3>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Total de Partidas</span>
+          <span class="field-val-display" id="v-matches">22.933</span>
+        </div>
+        <input type="range" class="field-range" id="r-matches" min="8424" max="59573" value="22933"
+          oninput="syncField('matches', this.value)">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Win Ratio (%)</span>
+          <span class="field-val-display" id="v-winratio">7,61</span>
+        </div>
+        <input type="range" class="field-range" id="r-winratio" min="0.2" max="20" step="0.1" value="7.61"
+          oninput="syncField('winratio', this.value)">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Kills por Partida</span>
+          <span class="field-val-display" id="v-kpm">1,96</span>
+        </div>
+        <input type="range" class="field-range" id="r-kpm" min="0.2" max="5.2" step="0.01" value="1.96"
+          oninput="syncField('kpm', this.value)">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Minutos Jugados</span>
+          <span class="field-val-display" id="v-minutes">155.522</span>
+        </div>
+        <input type="range" class="field-range" id="r-minutes" min="91514" max="321047" value="155522"
+          oninput="syncField('minutes', this.value)">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Total Kills</span>
+          <span class="field-val-display" id="v-kills">43.245</span>
+        </div>
+        <input type="range" class="field-range" id="r-kills" min="4420" max="120916" value="43245"
+          oninput="syncField('kills', this.value)">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">
+          <span>Minutos por Partida</span>
+          <span class="field-val-display" id="v-mpm">7,10</span>
+        </div>
+        <input type="range" class="field-range" id="r-mpm" min="3.3" max="14.6" step="0.1" value="7.1"
+          oninput="syncField('mpm', this.value)">
+      </div>
+
+      <button class="pred-btn" onclick="runPrediction()">
+        Analizar Jugador
+      </button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="pred-results" id="pred-results">
+      <div class="result-card" id="empty-state-card">
+        <div class="empty-state">
+          <div class="es-icon">
+            <div>
+              <div class="es-line"></div>
+              <div class="es-line" style="width:14px;margin-top:3px"></div>
+              <div class="es-line" style="width:10px;margin-top:3px"></div>
+            </div>
+          </div>
+          <p>Ajusta los parametros y presiona<br><strong style="color:var(--fn-ice)">Analizar Jugador</strong><br>para ver las predicciones del modelo.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
 
 <footer>
-  Dashboard Fortnite · Análisis CRISP-DM · Modelos: Regresión + Clasificación + Clustering · 1.435 jugadores analizados
+  Fortnite Analytics — CRISP-DM — Regresion Lineal + Clasificacion + K-Means Clustering — Dataset: 1.435 jugadores
 </footer>
 
 <script>
-Chart.defaults.color = '#64748b';
-Chart.defaults.borderColor = '#1e2d45';
+// ──────────────────────────────────
+// SCATTER DATA (1435 pts)
+// ──────────────────────────────────
+const SCATTER = [[108481.8,110154.1,"1"],[110794.8,112751.4,"1"],[115147.0,109103.1,"1"],[42708.0,52645.4,"0"],[103940.5,111064.1,"1"],[106610.2,105871.5,"1"],[120915.8,141568.4,"1"],[52506.8,49738.9,"0"],[27321.0,27199.6,"0"],[44042.0,42925.8,"0"],[73646.8,72248.1,"1"],[58174.8,52418.5,"1"],[87118.0,85448.8,"1"],[38676.0,40947.1,"0"],[74736.0,74501.4,"1"],[55416.0,59142.3,"0"],[55161.0,51209.8,"0"],[49362.0,43186.8,"0"],[56189.5,59377.1,"0"],[62534.0,70275.6,"1"],[51632.8,47058.0,"0"],[59751.0,58850.6,"1"],[74226.0,77025.6,"1"],[44649.0,37183.7,"0"],[36089.0,37906.9,"0"],[78881.8,79589.3,"1"],[99245.0,88422.2,"1"],[65566.0,61810.2,"1"],[36575.0,38898.0,"0"],[55235.2,53762.4,"1"],[27289.0,34865.9,"0"],[113525.2,103876.7,"1"],[56635.0,53818.7,"0"],[89505.0,88945.9,"1"],[68958.0,64327.5,"1"],[52977.0,51887.2,"1"],[28306.0,29766.9,"0"],[32710.0,33717.8,"0"],[91679.8,89745.8,"1"],[42585.0,47027.6,"0"],[19846.0,24092.6,"0"],[48339.8,47848.0,"0"],[19395.0,26866.2,"0"],[75090.0,78477.4,"1"],[67260.8,72344.3,"1"],[42032.0,49201.3,"1"],[84838.0,81327.5,"1"],[79608.0,72039.1,"0"],[42648.0,44755.8,"0"],[67503.0,68771.6,"1"],[56344.0,67187.6,"1"],[89751.0,95553.1,"1"],[27209.0,23931.3,"0"],[40264.0,28870.8,"0"],[67507.0,69756.6,"1"],[94129.0,93362.5,"1"],[55419.0,57167.6,"0"],[56972.0,56610.5,"1"],[74327.8,74977.7,"1"],[83830.0,82599.9,"1"],[51297.0,53133.6,"1"],[21336.0,20675.5,"0"],[69122.0,61855.9,"0"],[66581.0,75348.5,"1"],[58805.8,57193.9,"0"],[60285.0,62063.4,"1"],[53001.0,53180.6,"0"],[64485.0,64643.0,"1"],[39724.0,40586.7,"0"],[40941.0,35611.8,"1"],[50856.8,60338.2,"1"],[43092.8,45677.9,"0"],[40969.0,38935.2,"1"],[69358.0,59051.5,"0"],[65112.0,65924.3,"0"],[61773.0,56121.1,"0"],[41118.0,41822.5,"0"],[49470.0,46308.6,"1"],[52816.0,51188.5,"0"],[48811.0,51011.5,"0"],[55280.0,50729.2,"1"],[29824.0,34127.6,"0"],[36377.0,35238.5,"0"],[31839.0,27688.1,"0"],[76996.0,72662.6,"1"],[41417.0,38681.6,"0"],[49566.0,43114.0,"1"],[72305.0,65285.7,"0"],[78516.0,73643.3,"1"],[33881.0,43179.2,"0"],[39495.0,44270.1,"0"],[34997.0,38259.5,"0"],[86434.0,79456.9,"1"],[44850.0,38991.9,"1"],[14736.0,20983.2,"0"],[84665.8,77780.8,"1"],[35708.8,32393.1,"0"],[34128.0,29263.3,"0"],[74226.0,63052.6,"1"],[91444.0,88523.0,"1"],[44594.0,42375.2,"0"],[85920.8,89486.3,"1"],[40983.0,41402.8,"0"],[73951.8,74036.3,"1"],[34669.8,38808.2,"0"],[75734.8,81801.5,"1"],[57909.0,59183.6,"1"],[12902.0,19227.1,"0"],[69909.2,65256.7,"1"],[94084.0,93373.9,"1"],[50738.0,45457.4,"0"],[48858.8,51993.8,"0"],[23476.0,23466.1,"0"],[64792.0,58463.1,"0"],[39667.0,37374.4,"0"],[46035.0,46321.7,"0"],[51512.0,53047.5,"1"],[68392.0,65391.5,"0"],[86781.0,80649.0,"1"],[94054.0,93251.5,"1"],[34371.0,32199.3,"0"],[49994.0,49420.0,"1"],[56458.0,61306.4,"1"],[36874.0,37622.5,"0"],[50957.8,50245.1,"0"],[43443.0,34194.8,"0"],[45568.0,43796.6,"0"],[63443.8,51619.0,"0"],[69674.8,64844.6,"0"],[39810.0,41127.4,"1"],[31232.0,30029.8,"0"],[36851.0,35789.8,"0"],[82313.2,79244.8,"1"],[75694.0,70318.2,"1"],[64793.0,63197.5,"1"],[20271.0,16834.5,"0"],[57634.2,53934.2,"1"],[62453.8,57443.1,"1"],[47104.2,47103.8,"0"],[66548.2,64572.5,"1"],[37689.0,35182.8,"0"],[18468.0,19109.4,"0"],[29896.0,28581.0,"0"],[43549.0,48042.3,"1"],[29960.0,24760.7,"0"],[59559.8,57458.2,"0"],[92492.8,89564.5,"1"],[37698.0,33078.5,"0"],[54304.0,53506.3,"0"],[86785.0,92211.0,"1"],[35454.0,34534.0,"0"],[12264.0,16327.0,"0"],[58759.0,56935.7,"0"],[50250.8,49423.2,"1"],[51712.0,52983.5,"0"],[92016.0,84881.5,"1"],[23555.0,28113.5,"0"],[26493.0,31587.1,"0"],[54354.0,56742.9,"1"],[43332.0,44315.8,"0"],[13428.0,18351.2,"0"],[60779.0,54285.5,"0"],[27100.0,34636.6,"0"],[41792.0,40113.7,"1"],[69676.0,69030.2,"1"],[45957.0,34225.8,"0"],[60385.0,56375.7,"1"],[53670.0,54309.4,"1"],[44611.0,43980.7,"0"],[29153.0,28194.7,"0"],[29591.0,23903.3,"0"],[42576.0,42252.0,"0"],[39988.0,41115.7,"0"],[37148.0,41491.2,"0"],[15398.0,15370.3,"0"],[44679.0,41479.7,"0"],[95477.0,84427.4,"1"],[24474.0,17518.4,"0"],[74894.0,70747.4,"1"],[83913.0,82986.5,"1"],[57243.0,59478.4,"0"],[47237.0,44220.3,"0"],[64456.8,61880.4,"1"],[30570.0,32463.2,"0"],[27765.0,30562.3,"0"],[30636.0,29414.7,"0"],[46653.0,45865.4,"0"],[34741.0,30128.7,"0"],[33158.0,34732.7,"0"],[55715.0,49707.9,"0"],[49779.0,48162.1,"0"],[86065.0,81770.2,"1"],[47692.0,45228.8,"0"],[20315.0,25472.0,"0"],[64712.2,66332.0,"1"],[51263.0,50030.7,"1"],[52855.0,54191.3,"0"],[47828.0,50369.5,"1"],[32693.0,31560.8,"0"],[23931.0,20334.2,"0"],[45867.0,41456.8,"0"],[19789.0,18857.9,"0"],[29094.0,32989.4,"0"],[49615.0,54466.5,"1"],[27778.0,32672.4,"0"],[69358.0,65733.6,"1"],[45794.0,44925.1,"0"],[56893.0,57075.5,"1"],[60263.0,60206.0,"1"],[45452.8,44823.5,"1"],[32309.0,31131.4,"0"],[35739.0,34383.5,"0"],[75349.0,65150.8,"0"],[30465.0,34610.0,"0"],[39618.0,37536.2,"0"],[76820.2,78616.8,"1"],[85594.2,86631.1,"1"],[19776.0,32433.7,"0"],[12716.0,19558.7,"0"],[42603.0,49915.1,"1"],[35186.0,44938.6,"0"],[36739.0,38233.9,"0"],[53386.0,52323.3,"0"],[32986.0,32532.8,"0"],[49962.0,48503.0,"0"],[36235.0,40409.0,"0"],[51415.0,50999.3,"1"],[29523.0,31760.2,"0"],[98018.8,106421.1,"1"],[92110.0,91885.0,"1"],[60914.0,53995.6,"0"],[33001.0,31382.6,"0"],[31202.0,34057.5,"0"],[54236.0,50898.5,"0"],[31405.0,36109.6,"0"],[37901.0,39603.2,"0"],[83624.0,80268.9,"1"],[45028.0,40866.7,"0"],[60215.8,64033.7,"1"],[33264.0,34125.0,"0"],[90653.2,96063.2,"1"],[28174.0,28254.0,"0"],[51895.8,45252.3,"1"],[44933.8,49790.8,"0"],[29610.0,38113.7,"0"],[32253.0,32513.4,"0"],[44415.0,56273.4,"1"],[51129.0,46222.6,"0"],[36529.0,40139.4,"0"],[60084.2,59234.0,"1"],[52841.0,54839.9,"1"],[88313.0,87653.6,"1"],[37420.0,31865.9,"0"],[29874.0,32936.0,"0"],[63583.0,65642.6,"1"],[52531.0,43897.6,"0"],[40257.0,40884.7,"0"],[17526.0,25837.5,"0"],[45066.0,48661.4,"1"],[45202.0,42950.4,"0"],[97246.0,89847.1,"1"],[27715.0,31294.8,"0"],[41599.0,42137.6,"0"],[56727.0,53615.7,"0"],[28466.0,29995.5,"0"],[31616.0,33997.7,"0"],[30331.0,30180.3,"0"],[55536.0,54645.2,"0"],[31243.0,28275.5,"0"],[42346.0,45876.4,"0"],[37697.0,29286.5,"1"],[66768.0,63649.7,"1"],[22304.0,20802.1,"0"],[52062.0,50800.8,"1"],[45368.0,46148.6,"0"],[79306.0,79616.7,"1"],[25205.0,23317.0,"0"],[16666.0,20504.7,"0"],[28227.0,25999.8,"0"],[24699.0,26907.2,"0"],[39973.0,40020.9,"1"],[39574.0,37194.6,"0"],[46364.0,43907.4,"0"],[29568.0,28763.0,"0"],[30831.0,25580.7,"0"],[49882.0,51402.6,"1"],[32762.0,39058.2,"0"],[43776.0,45588.5,"0"],[55203.0,55797.2,"1"],[41974.0,43331.8,"0"],[47553.0,45855.6,"0"],[16510.0,14484.1,"0"],[34816.0,29976.0,"0"],[49623.0,49429.1,"0"],[31104.0,31592.9,"0"],[26835.0,30148.0,"0"],[46431.0,48782.3,"1"],[61737.0,61007.1,"0"],[36916.0,35006.1,"0"],[43455.0,41919.2,"1"],[32721.0,34932.7,"0"],[45216.0,46201.3,"1"],[34914.0,37645.5,"0"],[33617.0,33888.6,"0"],[76225.0,69787.3,"1"],[36473.0,34261.8,"1"],[34288.0,31339.5,"0"],[40979.0,40789.5,"0"],[33714.0,30624.6,"0"],[47889.0,46396.0,"0"],[46192.0,45713.9,"0"],[27145.8,24893.4,"0"],[64367.0,65331.3,"1"],[36234.0,33587.3,"0"],[35255.0,32876.3,"0"],[35224.0,35039.4,"0"],[40872.0,40214.2,"0"],[100344.8,94848.1,"1"],[36910.0,36608.6,"0"],[30921.0,34366.9,"0"],[39735.0,31279.9,"1"],[36859.0,36378.2,"0"],[62543.0,59079.0,"0"],[50279.8,47737.7,"1"],[24679.0,26337.6,"0"],[38043.0,41864.5,"0"],[54972.0,57801.9,"0"],[31385.0,28103.6,"0"],[80489.8,77326.0,"1"],[35978.0,38869.2,"0"],[36253.0,34625.1,"0"],[44197.0,44441.1,"0"],[33432.0,32173.6,"0"],[87594.2,83436.9,"1"],[36208.0,36588.5,"0"],[66414.0,64217.9,"1"],[28896.0,28311.2,"0"],[32231.0,33689.1,"0"],[77514.8,84961.0,"1"],[40753.0,39432.9,"1"],[23548.0,33934.2,"0"],[70860.0,73167.7,"1"],[46580.0,51734.9,"1"],[56359.2,57838.8,"1"],[35089.8,35849.0,"0"],[78134.0,78175.3,"1"],[39632.8,39942.8,"0"],[58035.8,58107.7,"0"],[35975.0,41974.7,"0"],[47201.0,46992.2,"1"],[55728.0,60421.5,"1"],[70349.0,69366.9,"1"],[31957.0,33912.7,"0"],[34042.0,35510.8,"0"],[24415.0,26991.1,"1"],[48384.8,44002.1,"1"],[42017.0,39756.1,"0"],[36566.0,35213.7,"0"],[60670.8,58898.5,"0"],[61747.2,57485.8,"1"],[43194.0,45530.3,"0"],[15352.0,11536.6,"0"],[31581.0,34372.5,"0"],[34745.0,34842.8,"0"],[31807.0,35493.7,"0"],[43078.0,41969.8,"0"],[38371.0,35056.7,"0"],[32291.0,29232.2,"0"],[58001.0,64638.9,"1"],[68753.0,60721.4,"1"],[33304.0,29632.0,"0"],[49180.0,50081.6,"1"],[84297.2,81559.2,"1"],[56897.0,50561.3,"0"],[59301.8,58453.6,"1"],[30509.0,33451.3,"0"],[74051.2,67927.5,"1"],[44434.0,44712.5,"0"],[31851.0,33115.3,"1"],[36484.0,32218.6,"0"],[64499.0,60160.1,"1"],[37856.0,42201.6,"1"],[81161.2,82178.4,"1"],[48758.0,46842.2,"1"],[38380.0,37893.5,"0"],[72631.0,72728.9,"1"],[44876.0,44801.0,"0"],[43309.0,44413.8,"0"],[39529.0,37543.2,"0"],[58661.0,59351.1,"1"],[51785.8,51282.8,"0"],[19684.0,16185.7,"0"],[47985.0,46627.3,"0"],[44671.0,50583.9,"0"],[50005.0,48219.6,"1"],[60257.0,53944.5,"0"],[37195.2,38614.6,"1"],[31723.0,33103.2,"0"],[18484.0,26058.9,"0"],[41350.8,37801.8,"1"],[31308.0,31966.6,"0"],[22788.0,22792.1,"0"],[39063.0,38347.3,"0"],[40404.0,38912.5,"0"],[41419.0,40648.8,"0"],[31107.0,34892.4,"0"],[63613.0,62401.7,"1"],[27497.0,31899.4,"0"],[27173.0,24806.2,"0"],[15359.0,14458.4,"0"],[53653.0,51750.3,"0"],[61644.0,56488.5,"1"],[26407.0,27378.8,"0"],[58289.2,55850.3,"0"],[47182.0,47028.5,"1"],[42673.8,40449.6,"0"],[44074.0,44542.4,"0"],[65535.0,64779.8,"1"],[32623.0,31335.8,"0"],[58539.0,64433.5,"1"],[43335.0,43823.6,"0"],[84061.0,80252.3,"1"],[41016.0,40018.2,"0"],[29413.0,30685.2,"0"],[41887.0,49546.8,"1"],[24296.0,20867.3,"0"],[49246.0,50682.2,"0"],[56151.8,55620.1,"1"],[60711.8,60270.3,"0"],[43446.0,40911.9,"0"],[60620.0,56254.4,"0"],[49871.0,47162.7,"0"],[70564.0,74617.9,"1"],[58760.0,55266.4,"0"],[31292.0,37797.5,"0"],[22314.0,23720.8,"0"],[44843.0,43392.8,"0"],[35188.0,37752.3,"0"],[51006.0,55243.0,"1"],[31945.0,34859.3,"0"],[37268.0,35215.5,"0"],[39880.0,40047.8,"0"],[41119.8,41220.5,"0"],[23496.0,26996.0,"0"],[36643.0,37503.8,"0"],[42252.0,42582.9,"0"],[38265.0,38210.7,"0"],[29546.0,28949.1,"0"],[47514.0,32486.6,"0"],[22801.0,23245.2,"0"],[32814.8,29931.8,"0"],[80306.0,84339.3,"1"],[33035.0,32249.3,"1"],[94540.8,83537.4,"1"],[34005.0,32794.5,"0"],[13593.0,15787.9,"0"],[20563.0,21404.2,"0"],[24533.0,26094.9,"0"],[50619.0,52193.7,"1"],[51764.0,58176.9,"0"],[51564.0,51341.1,"0"],[47526.2,51783.3,"1"],[46695.0,45440.5,"0"],[38282.0,37228.7,"0"],[33070.0,33466.3,"0"],[68164.2,75930.1,"1"],[32602.0,31546.9,"0"],[43828.0,45654.0,"1"],[40848.0,39961.3,"0"],[15563.0,16329.8,"0"],[63803.0,67593.2,"1"],[36972.0,39037.2,"0"],[34897.8,35221.9,"0"],[102613.0,93113.5,"1"],[47513.0,55645.1,"1"],[66669.0,71389.9,"1"],[42314.0,41899.6,"0"],[32132.0,29294.1,"0"],[41437.0,41135.6,"0"],[38566.0,40821.7,"1"],[38647.0,39557.5,"0"],[45303.0,42991.4,"0"],[49706.0,48768.0,"0"],[41479.0,40577.8,"0"],[43727.0,45363.8,"1"],[62388.0,66486.0,"1"],[85396.2,87666.0,"1"],[38979.0,38113.2,"1"],[42675.0,42431.0,"0"],[59633.8,57057.3,"0"],[36999.0,37913.2,"0"],[37497.8,32680.6,"0"],[23935.0,23498.7,"0"],[19397.0,19569.2,"0"],[69335.0,69852.8,"1"],[29744.0,37063.6,"0"],[35536.0,35924.3,"0"],[60475.0,62539.1,"1"],[64837.0,59603.0,"0"],[17461.0,18761.2,"0"],[33924.0,34680.0,"1"],[26379.8,24766.1,"0"],[42458.8,39734.6,"1"],[46088.8,46130.4,"0"],[71530.0,68309.3,"1"],[28217.0,26725.0,"0"],[26583.0,27488.9,"0"],[23384.0,25919.1,"0"],[23011.0,24728.3,"0"],[23510.0,26449.2,"0"],[40634.8,36264.7,"0"],[16405.0,18784.3,"0"],[50991.0,48356.4,"1"],[19117.0,16445.9,"0"],[48836.0,48882.7,"0"],[55582.0,56609.3,"1"],[45556.0,43984.1,"0"],[43068.0,41270.9,"1"],[44200.8,45205.3,"0"],[33568.0,33932.1,"0"],[63735.0,59786.2,"0"],[50404.0,52299.3,"1"],[34501.8,29198.1,"0"],[61618.8,66806.5,"1"],[46542.0,43279.4,"0"],[59505.0,55997.7,"1"],[49441.0,50236.7,"1"],[39289.0,39924.8,"0"],[50211.0,48283.0,"1"],[37307.0,40455.8,"0"],[69070.0,72635.8,"1"],[23129.0,25189.1,"0"],[23012.0,20946.9,"0"],[67661.0,64496.3,"1"],[23528.0,25151.7,"0"],[47906.0,50003.3,"1"],[48435.0,43192.4,"0"],[52886.8,59914.0,"1"],[30160.0,29462.4,"0"],[15996.0,16106.6,"0"],[40763.0,40520.7,"0"],[24601.0,20780.3,"0"],[30855.0,32696.2,"0"],[39094.0,36415.1,"0"],[42360.0,43471.7,"1"],[26941.0,26202.6,"0"],[43548.0,49629.9,"1"],[43297.0,40522.6,"1"],[13327.0,9671.1,"0"],[42463.8,43884.6,"0"],[30863.0,31199.4,"0"],[32416.0,34728.0,"0"],[57741.0,55918.9,"1"],[48316.0,61326.5,"1"],[34511.0,35434.0,"0"],[34987.0,39324.2,"0"],[53970.0,53488.5,"1"],[35245.0,35839.6,"1"],[33503.0,37933.0,"0"],[31210.0,32010.5,"0"],[25839.0,26918.0,"0"],[33834.0,35208.3,"0"],[46126.8,43986.5,"0"],[39099.0,39104.4,"0"],[32740.0,33088.1,"0"],[41243.0,42485.6,"1"],[39517.0,37180.9,"0"],[30291.0,29293.1,"0"],[37823.0,36033.4,"1"],[77478.5,77805.3,"1"],[38276.0,36312.5,"0"],[28453.0,33469.4,"0"],[72027.2,73875.3,"1"],[27540.0,28058.2,"0"],[37245.0,36269.5,"0"],[62398.2,62520.0,"1"],[72006.0,79533.0,"1"],[30211.0,31875.6,"0"],[70060.0,75942.8,"1"],[43723.8,50573.0,"0"],[37956.0,42455.9,"0"],[31217.0,31414.5,"0"],[27436.0,25787.1,"0"],[56284.0,57413.4,"0"],[17618.0,17710.2,"0"],[39997.0,38457.3,"1"],[68451.0,68719.6,"1"],[44302.0,45374.5,"0"],[40588.0,42124.8,"1"],[25752.0,20926.9,"0"],[24993.0,28570.1,"0"],[41036.0,40321.2,"0"],[29676.0,19019.9,"0"],[34441.0,33733.0,"0"],[47618.0,41932.3,"1"],[29325.0,29855.2,"0"],[22702.0,26334.7,"0"],[23598.0,27574.7,"0"],[56405.0,56462.4,"1"],[47935.0,49414.8,"0"],[35076.8,33101.6,"0"],[42884.0,44294.6,"0"],[45053.0,46993.9,"0"],[23874.0,20712.1,"0"],[32744.0,36015.8,"0"],[45459.0,43090.2,"0"],[33671.0,36010.9,"0"],[41064.8,38138.7,"0"],[62301.0,54768.8,"0"],[28900.0,32415.3,"0"],[32841.0,34670.0,"0"],[22198.0,19818.7,"0"],[53098.8,54252.1,"1"],[56444.8,60133.4,"1"],[32468.0,31879.1,"0"],[68161.2,74024.0,"1"],[48342.0,45422.2,"1"],[16890.0,19058.9,"0"],[45816.0,45645.7,"0"],[31843.0,29694.6,"0"],[36769.0,37190.6,"0"],[37585.0,35257.7,"0"],[52224.0,54663.3,"1"],[44457.0,43573.1,"0"],[24844.0,19736.8,"0"],[48164.0,54144.4,"1"],[25392.0,27548.4,"0"],[35940.0,34714.5,"0"],[40226.0,40277.4,"0"],[63892.0,61785.1,"1"],[47986.0,47164.7,"0"],[64334.0,59595.3,"0"],[50361.8,50014.1,"0"],[34231.0,34591.0,"1"],[37507.0,37023.8,"0"],[14380.0,13963.2,"0"],[62798.0,60357.9,"0"],[38689.0,37826.4,"0"],[39764.2,45468.1,"1"],[43652.0,41786.7,"1"],[42455.0,38045.4,"1"],[41481.0,45101.1,"0"],[30263.0,32230.1,"0"],[18561.0,16763.8,"0"],[89411.8,93091.1,"1"],[38952.0,36560.6,"1"],[46142.0,49260.8,"0"],[35490.2,38015.2,"0"],[19671.0,21874.5,"0"],[22708.0,24610.9,"0"],[26434.0,24726.7,"0"],[49123.0,47036.6,"1"],[27697.0,25037.3,"0"],[52418.8,54136.5,"1"],[54862.0,60584.3,"1"],[24228.0,25447.2,"0"],[42945.0,41065.2,"0"],[41645.0,34813.4,"0"],[32685.0,33570.4,"0"],[32750.2,32332.1,"0"],[27706.0,34210.2,"0"],[34274.0,35185.5,"1"],[24438.0,21158.1,"0"],[40602.8,42057.8,"0"],[42292.0,43409.5,"0"],[36831.0,39260.8,"0"],[19882.0,20711.1,"0"],[27386.0,27969.3,"0"],[20291.0,21845.9,"0"],[20604.0,22659.5,"0"],[52380.0,54279.1,"1"],[35566.0,34474.7,"1"],[42181.0,43240.5,"0"],[40614.0,42428.2,"0"],[85357.0,79818.6,"1"],[68610.0,62994.8,"1"],[32058.0,34674.5,"0"],[39327.0,38756.8,"0"],[44704.0,47548.5,"1"],[32868.0,32966.2,"0"],[65873.5,67317.7,"1"],[39253.0,40516.4,"0"],[26597.0,27419.3,"0"],[54447.0,48414.5,"0"],[56235.0,54634.1,"0"],[51574.0,52916.4,"0"],[21538.0,23217.5,"0"],[29999.0,35297.4,"0"],[21010.0,25994.9,"0"],[44381.0,42746.3,"1"],[29902.0,32024.6,"0"],[47705.0,47863.7,"0"],[72020.0,70640.6,"1"],[15540.0,19635.2,"0"],[36143.0,36674.4,"0"],[67208.0,71751.8,"1"],[76043.0,73870.2,"1"],[61053.0,59051.9,"1"],[52241.5,47613.7,"1"],[39319.0,38912.2,"0"],[43231.0,44233.2,"0"],[27653.0,28186.3,"0"],[76292.0,74046.8,"1"],[36874.8,36587.7,"0"],[44262.8,39089.3,"1"],[50497.0,51713.5,"1"],[33072.0,40039.0,"0"],[19592.0,22397.7,"0"],[62331.8,64663.3,"1"],[23942.0,27050.5,"0"],[34600.0,33334.0,"1"],[29865.8,28631.7,"0"],[47525.8,45991.0,"0"],[57176.2,59214.2,"1"],[38302.0,40638.7,"0"],[31289.0,29279.2,"0"],[24505.0,22612.5,"0"],[21909.0,19634.5,"0"],[29578.0,29796.1,"0"],[38708.0,38386.6,"0"],[38050.0,38356.9,"0"],[49695.0,53837.5,"0"],[71900.0,74476.1,"1"],[43987.0,46301.5,"0"],[31043.0,31511.1,"0"],[63145.0,60542.9,"1"],[63458.0,75773.6,"1"],[49064.0,49726.1,"0"],[46798.0,49624.7,"1"],[97339.8,86799.0,"1"],[49377.0,46180.5,"0"],[20043.0,26577.6,"0"],[47028.8,46274.2,"1"],[38057.0,35793.6,"0"],[37663.0,40641.6,"0"],[44918.0,45713.0,"0"],[51865.2,53745.7,"0"],[23794.0,23263.2,"0"],[63602.0,64550.6,"1"],[28416.0,25748.3,"0"],[36142.0,36712.0,"0"],[45949.0,43087.9,"0"],[19720.0,22754.7,"0"],[39302.0,37026.7,"0"],[31970.8,30061.6,"0"],[35045.0,30516.0,"0"],[62627.0,59102.0,"1"],[20589.0,18355.7,"0"],[25885.0,24413.1,"0"],[33430.0,34040.8,"0"],[66615.8,63768.2,"1"],[31669.0,34177.3,"0"],[48752.0,48092.3,"0"],[71555.0,69209.6,"1"],[43046.0,44552.8,"0"],[39195.0,40185.3,"0"],[44034.0,43378.0,"0"],[21737.0,18469.6,"0"],[30715.0,31159.3,"0"],[46323.0,44875.0,"0"],[21189.0,20551.1,"0"],[29070.0,26475.5,"0"],[26758.0,27887.5,"0"],[40666.0,44487.1,"0"],[36287.0,39374.7,"0"],[41757.0,48264.9,"0"],[38520.0,38958.4,"1"],[34516.0,33628.8,"0"],[47237.0,49288.8,"0"],[58198.0,53828.9,"0"],[53524.0,56053.2,"1"],[37877.0,41512.4,"0"],[41684.0,37321.4,"0"],[25476.0,26056.0,"0"],[31188.0,33902.7,"0"],[39057.0,40178.9,"0"],[46997.0,44557.9,"0"],[22835.0,24858.1,"0"],[40586.0,40187.2,"0"],[52114.0,49110.4,"0"],[43202.0,43472.2,"0"],[70960.0,73247.5,"1"],[40562.0,41114.9,"0"],[52142.0,51834.4,"1"],[37845.0,37013.1,"0"],[24665.0,26072.7,"0"],[28063.0,23789.3,"0"],[30251.0,29164.8,"0"],[24022.8,25030.7,"0"],[50285.0,48269.8,"0"],[46025.0,45700.4,"1"],[87989.0,84180.1,"1"],[51408.0,48382.7,"1"],[47153.0,47453.7,"0"],[64823.2,63043.1,"1"],[38115.0,38806.8,"0"],[38957.0,39793.0,"0"],[41029.2,41484.2,"0"],[30450.0,30405.4,"0"],[73825.0,72602.5,"1"],[17240.0,19101.4,"0"],[58922.0,57775.8,"0"],[39005.0,45700.4,"0"],[19172.0,16033.5,"0"],[44973.2,44290.3,"0"],[21943.0,24155.8,"0"],[35789.8,29574.7,"0"],[64128.0,61658.2,"0"],[39046.0,37885.2,"0"],[27205.0,31160.3,"0"],[31747.0,31232.5,"0"],[66727.0,65449.0,"1"],[30726.0,32534.4,"0"],[36522.0,36480.0,"0"],[54373.8,50483.6,"0"],[49873.0,53578.6,"1"],[54537.0,54065.0,"1"],[40796.0,39967.0,"0"],[29831.0,30788.4,"0"],[27516.0,27976.4,"1"],[46837.0,45100.4,"0"],[13911.0,17163.1,"0"],[40299.0,37766.2,"0"],[18442.0,20591.1,"0"],[87917.0,79604.9,"1"],[21950.0,29098.5,"0"],[36663.8,34725.1,"0"],[29536.0,32212.3,"0"],[46997.0,46225.9,"0"],[32183.0,30752.2,"1"],[40559.0,35865.5,"0"],[41971.0,43508.4,"1"],[24113.0,23622.0,"0"],[35675.0,36130.5,"0"],[37550.8,38400.1,"0"],[38185.0,37700.5,"0"],[26165.0,25678.7,"0"],[20157.0,28452.0,"0"],[17858.0,15594.1,"0"],[51788.0,51342.6,"0"],[68923.0,70498.9,"1"],[49278.0,46775.5,"1"],[43689.0,42271.2,"0"],[23542.0,21146.7,"0"],[59560.0,64296.3,"1"],[43247.0,42427.7,"0"],[25603.0,28324.5,"0"],[30008.0,29696.9,"0"],[30252.0,30685.7,"0"],[28970.0,30945.7,"0"],[89165.0,84972.6,"1"],[52371.0,52334.9,"0"],[46000.0,47458.3,"0"],[31956.0,31585.9,"0"],[37592.0,38052.6,"0"],[24423.0,23315.7,"0"],[41371.0,40225.8,"0"],[23984.0,23236.2,"0"],[23557.0,25831.3,"0"],[22422.0,19808.0,"0"],[25952.8,23423.9,"0"],[30817.0,32033.1,"0"],[32116.0,29670.7,"0"],[42285.0,46370.4,"1"],[42763.0,41069.1,"1"],[85329.8,80006.5,"1"],[32170.0,34332.6,"0"],[27132.0,27349.0,"0"],[66806.0,70725.7,"1"],[30070.0,34502.3,"0"],[39811.0,39195.0,"1"],[53162.0,51208.5,"1"],[59428.0,56369.3,"1"],[53508.0,46179.8,"1"],[49513.0,52188.1,"1"],[28738.0,28843.2,"0"],[36327.0,36573.7,"0"],[30551.0,33634.6,"0"],[57509.0,55890.4,"1"],[95528.0,83968.4,"1"],[70685.0,69983.6,"1"],[24051.0,24952.5,"0"],[40236.0,37951.7,"0"],[37637.0,37774.6,"0"],[75183.0,70339.4,"1"],[87127.2,87042.4,"1"],[38449.0,37658.4,"0"],[25471.0,23577.6,"0"],[52738.0,52376.1,"0"],[42899.0,45483.6,"0"],[53042.0,53626.8,"1"],[45966.0,45187.3,"0"],[74822.0,74939.7,"1"],[79813.0,79385.8,"1"],[36069.0,39841.3,"0"],[53228.0,50402.2,"0"],[20726.0,21343.5,"0"],[46115.0,49425.7,"1"],[43290.8,44101.4,"0"],[29254.0,28844.1,"0"],[22491.0,25834.2,"0"],[37309.0,38688.3,"0"],[51445.0,51168.1,"1"],[60957.2,61617.3,"1"],[52418.0,48101.5,"1"],[74278.0,70089.3,"1"],[37456.0,36641.1,"0"],[29290.0,29053.4,"0"],[25013.0,27005.1,"0"],[44977.0,46892.1,"1"],[42269.2,54601.5,"1"],[39422.0,40595.1,"0"],[38396.0,35913.0,"0"],[47694.0,48317.7,"0"],[59626.0,56656.8,"1"],[53693.8,50296.6,"0"],[45151.0,46697.8,"1"],[35807.8,35932.6,"0"],[32072.8,37828.7,"0"],[51371.0,53242.2,"1"],[37700.0,35594.9,"0"],[54075.0,57902.7,"1"],[23789.0,26216.0,"0"],[34484.0,34907.6,"0"],[36454.0,37472.2,"1"],[39471.0,40908.3,"0"],[23099.0,20290.9,"0"],[30928.0,36523.0,"0"],[47825.0,47004.2,"0"],[50530.0,46998.6,"0"],[44508.0,45827.5,"0"],[65187.2,66883.6,"1"],[35562.0,31852.2,"0"],[53084.0,50144.6,"1"],[56021.8,54422.6,"0"],[34861.0,38445.9,"0"],[40874.0,39286.7,"0"],[43033.0,41254.0,"0"],[36687.0,41502.6,"0"],[37145.0,38548.5,"0"],[37026.0,35217.6,"0"],[34161.0,33157.0,"0"],[81902.0,83883.5,"1"],[37540.0,39113.4,"0"],[30925.0,30802.3,"0"],[29276.0,29908.4,"0"],[40837.0,39825.9,"1"],[35617.0,36960.0,"0"],[31348.0,33759.8,"0"],[28439.0,27769.2,"0"],[33408.0,36400.9,"1"],[78594.0,73862.8,"1"],[59263.2,57707.0,"1"],[63134.8,66112.3,"1"],[63359.8,68752.7,"1"],[59664.8,54887.4,"0"],[52396.0,51141.6,"0"],[52084.0,47764.0,"0"],[41244.0,39444.9,"0"],[48085.2,54376.2,"1"],[41865.0,40999.3,"0"],[44752.0,47708.6,"1"],[45669.0,46369.3,"0"],[33812.8,37130.8,"0"],[31339.0,30019.6,"0"],[19152.0,18059.0,"0"],[22097.0,20177.4,"0"],[34693.8,39391.7,"1"],[48761.0,48070.5,"0"],[20726.0,27762.9,"0"],[18101.0,16803.4,"0"],[48971.8,52002.0,"1"],[23829.0,25472.6,"0"],[49748.0,46722.9,"0"],[65297.0,63062.5,"1"],[40743.0,44251.5,"0"],[32979.0,33110.1,"0"],[29639.0,29334.6,"0"],[25276.0,24455.6,"0"],[15160.0,14822.2,"0"],[42976.0,40368.7,"0"],[42435.8,42962.1,"0"],[44520.0,41824.2,"0"],[19162.0,17299.0,"0"],[52802.0,49330.8,"0"],[67865.2,66108.6,"1"],[77895.8,76157.0,"1"],[40881.0,40009.6,"0"],[49915.0,45425.4,"1"],[21855.0,23699.4,"0"],[41754.0,46089.6,"0"],[40974.8,39319.8,"1"],[31252.0,31273.1,"0"],[30747.0,37093.7,"0"],[59017.0,57504.6,"0"],[35391.0,40542.4,"1"],[31835.8,25950.3,"0"],[54081.8,49366.9,"0"],[39588.0,38160.6,"0"],[35371.0,34627.5,"0"],[52632.2,57667.4,"1"],[25045.0,23492.1,"1"],[32947.0,33142.5,"1"],[68520.0,72550.5,"1"],[42444.8,42341.1,"0"],[30485.0,28655.5,"0"],[51941.0,52800.2,"1"],[64613.0,62566.7,"1"],[43340.0,42178.2,"0"],[48982.0,45379.4,"0"],[42989.8,40203.7,"0"],[20209.0,20240.9,"0"],[70352.5,72780.8,"1"],[36333.0,36331.9,"0"],[56087.0,54074.3,"0"],[106465.8,87095.7,"1"],[37160.0,45020.9,"1"],[40745.0,41729.9,"1"],[53066.2,54194.6,"0"],[18688.0,20257.2,"0"],[39732.0,37782.7,"1"],[33731.0,46983.4,"1"],[53676.0,50923.5,"0"],[31503.0,33643.8,"0"],[103384.0,92023.5,"1"],[35493.0,34536.4,"0"],[36950.0,36900.8,"0"],[31633.0,33808.0,"0"],[28491.0,33678.5,"0"],[38171.0,38506.0,"0"],[27925.0,23009.7,"0"],[32469.0,38888.9,"0"],[61974.0,60010.9,"1"],[46923.0,45566.1,"0"],[45783.0,45612.3,"1"],[28188.0,32497.0,"0"],[36981.0,38010.1,"0"],[33873.0,34850.2,"0"],[36758.0,41540.3,"0"],[28984.0,30203.6,"0"],[45099.0,51216.4,"1"],[28388.0,30058.3,"0"],[49192.0,52948.9,"1"],[23685.0,25175.7,"0"],[36437.0,37628.9,"0"],[29283.0,30161.4,"0"],[20885.0,21113.5,"0"],[52746.0,50600.0,"0"],[45169.0,45831.7,"0"],[41441.0,42627.1,"0"],[48786.0,49693.6,"1"],[32916.0,31748.7,"0"],[60359.0,58119.7,"1"],[22468.0,25300.5,"0"],[30663.0,33300.2,"0"],[42717.0,41926.9,"0"],[27431.0,26829.2,"0"],[28256.8,29573.5,"0"],[27751.0,28161.0,"0"],[28229.0,27575.2,"0"],[37908.2,42926.6,"1"],[37105.2,38747.2,"0"],[23770.0,26302.3,"0"],[17647.0,17977.3,"0"],[27483.0,30842.0,"0"],[46685.0,51526.9,"1"],[63746.0,65836.5,"1"],[90456.0,86200.6,"1"],[63543.0,67006.4,"1"],[27349.0,26207.6,"0"],[45796.0,50963.7,"1"],[36883.0,38504.5,"1"],[35550.0,48093.1,"1"],[33017.0,37405.4,"0"],[46340.0,42518.8,"0"],[18244.0,21954.1,"0"],[36282.0,37711.7,"0"],[27613.0,32916.4,"0"],[64154.8,58172.5,"1"],[27557.0,26689.8,"0"],[17021.0,17522.9,"0"],[55024.0,50272.1,"0"],[53153.0,51245.0,"0"],[33749.8,31364.6,"0"],[28231.0,29519.5,"0"],[18755.0,15395.4,"0"],[42290.0,44575.0,"0"],[38014.2,39026.3,"1"],[44762.2,51649.6,"1"],[25570.0,25387.7,"0"],[41538.0,41884.3,"0"],[29341.0,30375.5,"0"],[14945.0,21241.2,"0"],[66719.0,65817.8,"1"],[58519.0,54328.2,"1"],[56706.0,60170.5,"1"],[47146.0,49519.0,"0"],[64870.0,62591.7,"1"],[23442.0,19879.4,"0"],[36138.0,36487.7,"0"],[30025.0,30596.1,"0"],[43066.0,49075.8,"0"],[33484.0,36682.9,"0"],[31009.8,27452.4,"0"],[38568.0,47224.9,"0"],[33500.0,32566.4,"0"],[22878.0,24365.2,"0"],[19457.0,21313.4,"0"],[37092.0,37179.9,"0"],[25672.0,28620.8,"0"],[48776.0,47283.5,"0"],[44008.8,44109.1,"0"],[56402.0,52781.9,"1"],[47564.0,47383.2,"1"],[41828.0,41944.1,"1"],[67035.0,69515.3,"1"],[40607.0,40979.8,"0"],[29755.0,28130.9,"0"],[66144.0,65178.6,"1"],[59755.0,61189.0,"1"],[44994.0,43767.4,"1"],[53095.0,51292.4,"0"],[39009.0,38055.8,"0"],[77598.0,77747.9,"1"],[30255.0,30977.2,"1"],[39310.8,36616.5,"0"],[33506.0,33654.5,"0"],[65500.0,68632.2,"1"],[37315.0,39525.1,"1"],[48676.0,51447.0,"1"],[37562.0,36101.9,"1"],[44999.0,45067.6,"0"],[30168.0,34572.4,"0"],[26250.0,30791.4,"0"],[55829.0,61385.6,"1"],[27037.0,27654.0,"0"],[51320.0,50733.4,"0"],[18823.0,16335.0,"0"],[88727.5,85597.5,"1"],[22306.0,25827.9,"0"],[46601.0,47950.1,"1"],[38138.0,36225.0,"0"],[44073.0,44713.3,"1"],[60106.0,59348.8,"1"],[32835.0,32457.4,"0"],[36082.0,33730.4,"0"],[33234.0,31225.3,"0"],[46832.0,45470.7,"0"],[30489.2,31249.8,"0"],[52640.0,50945.0,"1"],[53542.0,51422.9,"0"],[34644.0,34566.2,"0"],[39657.0,38396.2,"0"],[49403.2,57732.6,"1"],[43451.0,45682.3,"0"],[51485.0,51403.2,"0"],[42689.0,46038.0,"0"],[60087.0,56697.0,"1"],[26995.0,30091.0,"0"],[27694.0,28202.2,"0"],[36263.0,39172.4,"0"],[39931.0,41293.0,"1"],[46612.0,47565.7,"0"],[15094.0,12861.6,"0"],[34393.8,34214.9,"0"],[30527.0,30911.6,"1"],[42265.0,42465.6,"0"],[37033.0,37661.1,"0"],[36365.0,39771.6,"0"],[25560.0,27689.8,"0"],[50912.8,54875.7,"1"],[37408.0,38755.7,"1"],[33998.8,30725.8,"1"],[63927.0,63847.5,"1"],[29187.8,26826.0,"0"],[32644.0,29567.7,"0"],[25709.0,24291.7,"0"],[40770.0,40960.6,"0"],[16695.0,12513.2,"0"],[28932.0,29790.6,"0"],[56440.0,55951.6,"1"],[46858.0,45674.9,"0"],[33760.0,33789.8,"0"],[52367.0,51584.2,"1"],[43822.0,43406.3,"0"],[31309.0,31150.6,"1"],[28384.0,26439.2,"0"],[48072.0,48809.6,"0"],[18646.0,23310.4,"0"],[21654.0,21572.7,"0"],[32432.8,22738.9,"0"],[41842.0,43143.1,"0"],[54043.0,54361.0,"1"],[23154.0,27111.8,"0"],[49403.0,49413.7,"0"],[24362.0,22626.3,"0"],[30374.0,32166.3,"0"],[37550.0,38780.0,"0"],[42722.0,42106.7,"0"],[64420.0,63002.9,"0"],[33000.0,32727.0,"0"],[37473.0,41031.8,"0"],[29341.0,28633.8,"0"],[46848.0,45820.1,"1"],[37886.0,39502.8,"0"],[27846.0,30396.3,"0"],[56481.2,59082.1,"1"],[26423.0,27049.7,"0"],[49044.0,46475.1,"0"],[28104.0,22732.1,"1"],[40628.0,42149.1,"0"],[25759.0,30123.4,"0"],[33267.0,33462.7,"0"],[25830.0,30524.5,"0"],[52201.0,50728.0,"1"],[24905.0,28905.7,"0"],[50336.8,47902.5,"1"],[63274.0,59342.9,"1"],[55978.0,54866.9,"0"],[34043.8,33726.2,"0"],[44227.0,45354.4,"0"],[33938.0,33742.5,"0"],[38027.0,42661.9,"1"],[35923.0,36748.2,"0"],[38928.0,37795.3,"1"],[39914.2,41319.4,"1"],[74848.0,75684.8,"1"],[45032.8,44064.1,"1"],[30995.0,31231.3,"0"],[49071.0,55111.3,"0"],[31874.0,32030.5,"0"],[44004.0,46334.6,"0"],[28495.0,32471.8,"0"],[32244.0,36077.8,"0"],[57483.0,58687.4,"1"],[33212.0,38366.5,"0"],[47889.8,44635.1,"1"],[33073.0,34535.2,"0"],[32792.0,32358.9,"0"],[38066.0,40184.8,"0"],[39395.0,39234.0,"1"],[40635.0,46793.1,"0"],[43007.0,42217.7,"0"],[19892.0,19016.8,"0"],[22734.0,23229.8,"0"],[29736.0,30953.7,"0"],[18197.0,11615.5,"1"],[22254.0,16637.2,"0"],[30276.0,33347.5,"0"],[44924.0,45342.0,"0"],[66045.0,60294.8,"0"],[33346.0,33805.1,"0"],[28449.0,30022.1,"0"],[27001.0,26620.5,"0"],[59775.2,63105.9,"1"],[42050.0,42109.5,"0"],[58760.0,58847.6,"1"],[48105.8,41850.9,"0"],[60947.0,62149.9,"1"],[30106.0,29943.9,"0"],[16445.0,22182.0,"0"],[38049.0,38267.3,"0"],[31551.0,32018.1,"0"],[55346.0,50621.0,"0"],[24085.0,25205.2,"0"],[34823.0,37291.6,"0"],[27041.0,27864.8,"0"],[17749.0,16538.9,"0"],[37047.0,41786.8,"0"],[40746.2,39737.1,"1"],[18081.0,16378.1,"0"],[18698.0,20849.1,"0"],[37324.0,37936.6,"1"],[38313.0,37933.5,"0"],[48968.0,47971.1,"0"],[24657.0,24744.5,"0"],[51163.0,52484.3,"1"],[54059.0,60852.3,"1"],[26561.0,30062.9,"0"],[34862.0,33898.6,"0"],[26988.2,29454.9,"0"],[32746.0,35817.7,"1"],[61038.8,57644.9,"1"],[24119.0,24296.2,"0"],[20608.0,25443.0,"0"],[29017.0,29953.6,"0"],[30583.0,29332.5,"0"],[36838.0,38499.5,"1"],[29292.0,34091.4,"0"],[49036.8,45621.1,"1"],[61134.8,60115.2,"1"],[56173.0,62464.9,"1"],[29285.0,28510.2,"0"],[26112.0,24131.9,"1"],[22144.0,23426.2,"0"],[29620.0,28375.3,"1"],[39047.0,34596.6,"0"],[79205.0,78170.4,"1"],[75170.0,71928.5,"1"],[52210.0,58153.2,"1"],[50588.0,48958.2,"0"],[47295.0,47583.1,"0"],[34831.0,34841.2,"0"],[49047.0,47477.0,"0"],[76330.0,78183.3,"1"],[33094.0,39254.0,"1"],[59493.0,55585.9,"0"],[21993.0,24738.8,"0"],[47881.0,47672.5,"1"],[44963.0,43645.0,"1"],[46664.0,49374.5,"1"],[35924.0,33552.1,"0"],[44614.0,44502.8,"0"],[34353.8,33739.3,"0"],[51947.0,45245.4,"1"],[37767.0,36571.3,"1"],[19251.0,19546.1,"0"],[44676.0,46736.3,"0"],[35648.0,35697.1,"0"],[78647.0,75999.9,"1"],[47745.0,44335.8,"0"],[42816.2,44048.6,"0"],[28261.0,27571.3,"0"],[56712.0,58176.3,"1"],[51320.0,50111.4,"1"],[53704.0,56003.3,"1"],[39966.0,37840.5,"0"],[51470.0,51931.2,"0"],[56502.0,55515.6,"1"],[34762.0,34176.9,"0"],[64389.0,60809.7,"1"],[46365.0,47057.5,"0"],[27565.0,28898.6,"0"],[28449.0,27134.3,"0"],[18493.0,15422.6,"0"],[36588.0,38084.5,"0"],[59357.0,65081.6,"1"],[25792.0,25548.9,"0"],[23043.0,31117.4,"0"],[49008.0,44922.1,"0"],[25863.0,28305.6,"0"],[49737.0,47251.8,"1"],[26855.0,29055.8,"0"],[28127.0,28472.7,"0"],[19200.0,15449.7,"0"],[43462.0,43719.4,"1"],[46641.0,47144.4,"0"],[35695.0,34003.6,"0"],[51858.0,50955.1,"1"],[34276.0,35740.0,"0"],[21318.0,22407.5,"0"],[21880.0,25642.5,"0"],[38517.0,38746.3,"1"],[39000.0,39053.1,"0"],[39478.0,39405.0,"1"],[51475.0,51226.2,"0"],[28228.0,27649.7,"1"],[37079.0,38513.8,"0"],[22338.0,26480.5,"0"],[18269.0,14475.2,"0"],[25896.0,26652.0,"0"],[32696.0,32256.5,"0"],[40698.8,40832.2,"0"],[43467.0,41675.8,"0"],[38994.0,39247.9,"0"],[44207.0,43402.9,"1"],[65240.0,58742.2,"0"],[27017.0,28692.2,"0"],[48749.0,48292.5,"0"],[33302.0,34639.5,"0"],[32451.0,33558.2,"0"],[37542.0,40254.7,"0"],[46246.0,47868.9,"0"],[49613.8,51379.5,"1"],[38291.8,39177.7,"0"],[29792.0,30801.8,"0"],[38138.0,34741.9,"0"],[60693.0,66931.7,"1"],[14219.0,5419.0,"0"],[42136.0,42446.7,"0"],[48648.8,48042.6,"1"],[42546.0,44181.0,"0"],[38100.0,40331.1,"1"],[42881.0,42068.7,"0"],[35398.0,34173.9,"0"],[44064.8,40495.6,"1"],[32496.0,32578.8,"0"],[55187.0,52536.3,"0"],[38941.8,39401.6,"0"],[30937.0,30078.0,"0"],[45605.0,43656.9,"0"],[44290.0,44265.0,"0"],[41434.0,41668.3,"0"],[55096.2,59523.0,"1"],[42009.0,42177.6,"0"],[44636.0,42709.2,"0"],[28711.0,29318.5,"0"],[39999.0,39701.7,"0"],[37445.0,36770.3,"0"],[19893.0,19253.9,"0"],[51441.2,56256.2,"1"],[53723.2,59177.7,"1"],[12244.0,14893.7,"0"],[31428.0,30814.2,"0"],[24180.0,25469.8,"0"],[67947.0,58139.0,"0"],[24068.0,22491.8,"0"],[45831.0,45107.6,"0"],[38175.0,43914.4,"1"],[52994.0,50072.0,"0"],[57443.0,57713.6,"1"],[32065.2,33940.1,"0"],[23034.0,26132.3,"0"],[19940.0,19936.1,"0"],[54525.8,52470.5,"0"],[44607.0,44882.2,"1"],[55879.8,50410.3,"1"],[39324.0,42439.9,"1"],[36633.0,38247.5,"0"]];
+
+// ──────────────────────────────────
+// CHART DEFAULTS
+// ──────────────────────────────────
+Chart.defaults.color = '#4a6f8a';
+Chart.defaults.borderColor = '#142235';
 Chart.defaults.font.family = 'Inter';
 
-const ACCENT  = '#00d4ff';
-const ACCENT2 = '#a855f7';
-const ACCENT3 = '#f59e0b';
-const C0 = '#3b82f6';
-const C1 = '#a855f7';
+const SKY  = '#4ec9e8';
+const BLUE = '#1e90d6';
+const ICE  = '#a8d8f0';
+const WHITE = '#e8f4ff';
 
-// ── 1. PERFIL CHART (barras horizontales) ──
-new Chart(document.getElementById('perfilChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Base activa /\nrendimiento medio', 'Perfil competitivo /\nalto rendimiento'],
-    datasets: [{
-      label: 'Jugadores',
-      data: [970, 465],
-      backgroundColor: [C0 + 'cc', C1 + 'cc'],
-      borderColor: [C0, C1],
-      borderWidth: 1,
-      borderRadius: 6,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: {
-      callbacks: { label: ctx => ` ${ctx.raw} jugadores (${((ctx.raw/1435)*100).toFixed(1)}%)` }
-    }},
-    scales: {
-      x: { grid: { color: '#1e2d45' }, ticks: { color: '#64748b' } },
-      y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
-    }
-  }
-});
+function mkGrad(ctx, c1, c2) {
+  const g = ctx.createLinearGradient(0,0,0,200);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  return g;
+}
 
-// ── 2. SCATTER CHART ──
-const scatterRaw = [[108481.8,110154.1,"1"],[110794.8,112751.4,"1"],[115147.0,109103.1,"1"],[42708.0,52645.4,"0"],[103940.5,111064.1,"1"],[106610.2,105871.5,"1"],[120915.8,141568.4,"1"],[52506.8,49738.9,"0"],[27321.0,27199.6,"0"],[44042.0,42925.8,"0"],[73646.8,72248.1,"1"],[58174.8,52418.5,"1"],[87118.0,85448.8,"1"],[38676.0,40947.1,"0"],[74736.0,74501.4,"1"],[55416.0,59142.3,"0"],[55161.0,51209.8,"0"],[49362.0,43186.8,"0"],[56189.5,59377.1,"0"],[62534.0,70275.6,"1"],[51632.8,47058.0,"0"],[59751.0,58850.6,"1"],[74226.0,77025.6,"1"],[44649.0,37183.7,"0"],[36089.0,37906.9,"0"],[78881.8,79589.3,"1"],[99245.0,88422.2,"1"],[65566.0,61810.2,"1"],[36575.0,38898.0,"0"],[55235.2,53762.4,"1"],[27289.0,34865.9,"0"],[113525.2,103876.7,"1"],[56635.0,53818.7,"0"],[89505.0,88945.9,"1"],[68958.0,64327.5,"1"],[52977.0,51887.2,"1"],[28306.0,29766.9,"0"],[32710.0,33717.8,"0"],[91679.8,89745.8,"1"],[42585.0,47027.6,"0"],[19846.0,24092.6,"0"],[48339.8,47848.0,"0"],[19395.0,26866.2,"0"],[75090.0,78477.4,"1"],[67260.8,72344.3,"1"],[42032.0,49201.3,"1"],[84838.0,81327.5,"1"],[79608.0,72039.1,"0"],[42648.0,44755.8,"0"],[67503.0,68771.6,"1"],[56344.0,67187.6,"1"],[89751.0,95553.1,"1"],[27209.0,23931.3,"0"],[40264.0,28870.8,"0"],[67507.0,69756.6,"1"],[94129.0,93362.5,"1"],[55419.0,57167.6,"0"],[56972.0,56610.5,"1"],[74327.8,74977.7,"1"],[83830.0,82599.9,"1"],[51297.0,53133.6,"1"],[21336.0,20675.5,"0"],[69122.0,61855.9,"0"],[66581.0,75348.5,"1"],[58805.8,57193.9,"0"],[60285.0,62063.4,"1"],[53001.0,53180.6,"0"],[64485.0,64643.0,"1"],[39724.0,40586.7,"0"],[40941.0,35611.8,"1"],[50856.8,60338.2,"1"],[43092.8,45677.9,"0"],[40969.0,38935.2,"1"],[69358.0,59051.5,"0"],[65112.0,65924.3,"0"],[61773.0,56121.1,"0"],[41118.0,41822.5,"0"],[49470.0,46308.6,"1"],[52816.0,51188.5,"0"],[48811.0,51011.5,"0"],[55280.0,50729.2,"1"],[29824.0,34127.6,"0"],[36377.0,35238.5,"0"],[31839.0,27688.1,"0"],[76996.0,72662.6,"1"],[41417.0,38681.6,"0"],[49566.0,43114.0,"1"],[72305.0,65285.7,"0"],[78516.0,73643.3,"1"],[33881.0,43179.2,"0"],[39495.0,44270.1,"0"],[34997.0,38259.5,"0"],[86434.0,79456.9,"1"],[44850.0,38991.9,"1"],[14736.0,20983.2,"0"],[84665.8,77780.8,"1"],[35708.8,32393.1,"0"],[34128.0,29263.3,"0"],[74226.0,63052.6,"1"],[91444.0,88523.0,"1"],[44594.0,42375.2,"0"],[85920.8,89486.3,"1"],[40983.0,41402.8,"0"],[73951.8,74036.3,"1"],[34669.8,38808.2,"0"],[75734.8,81801.5,"1"],[57909.0,59183.6,"1"],[12902.0,19227.1,"0"],[69909.2,65256.7,"1"],[94084.0,93373.9,"1"],[50738.0,45457.4,"0"],[48858.8,51993.8,"0"],[23476.0,23466.1,"0"],[64792.0,58463.1,"0"],[39667.0,37374.4,"0"],[46035.0,46321.7,"0"],[51512.0,53047.5,"1"],[68392.0,65391.5,"0"],[86781.0,80649.0,"1"],[94054.0,93251.5,"1"],[34371.0,32199.3,"0"],[49994.0,49420.0,"1"],[56458.0,61306.4,"1"],[36874.0,37622.5,"0"],[50957.8,50245.1,"0"],[43443.0,34194.8,"0"],[45568.0,43796.6,"0"],[63443.8,51619.0,"0"],[69674.8,64844.6,"0"],[39810.0,41127.4,"1"],[31232.0,30029.8,"0"],[36851.0,35789.8,"0"],[82313.2,79244.8,"1"],[75694.0,70318.2,"1"],[64793.0,63197.5,"1"],[20271.0,16834.5,"0"],[57634.2,53934.2,"1"],[62453.8,57443.1,"1"],[47104.2,47103.8,"0"],[66548.2,64572.5,"1"],[37689.0,35182.8,"0"],[18468.0,19109.4,"0"],[29896.0,28581.0,"0"],[43549.0,48042.3,"1"],[29960.0,24760.7,"0"],[59559.8,57458.2,"0"],[92492.8,89564.5,"1"],[37698.0,33078.5,"0"],[54304.0,53506.3,"0"],[86785.0,92211.0,"1"],[35454.0,34534.0,"0"],[12264.0,16327.0,"0"],[58759.0,56935.7,"0"],[50250.8,49423.2,"1"],[51712.0,52983.5,"0"],[92016.0,84881.5,"1"],[23555.0,28113.5,"0"],[26493.0,31587.1,"0"],[54354.0,56742.9,"1"],[43332.0,44315.8,"0"],[13428.0,18351.2,"0"],[60779.0,54285.5,"0"],[27100.0,34636.6,"0"],[41792.0,40113.7,"1"],[69676.0,69030.2,"1"],[45957.0,34225.8,"0"],[60385.0,56375.7,"1"],[53670.0,54309.4,"1"],[44611.0,43980.7,"0"],[29153.0,28194.7,"0"],[29591.0,23903.3,"0"],[42576.0,42252.0,"0"],[39988.0,41115.7,"0"],[37148.0,41491.2,"0"],[15398.0,15370.3,"0"],[44679.0,41479.7,"0"],[95477.0,84427.4,"1"],[24474.0,17518.4,"0"],[74894.0,70747.4,"1"],[83913.0,82986.5,"1"],[57243.0,59478.4,"0"],[47237.0,44220.3,"0"],[64456.8,61880.4,"1"],[30570.0,32463.2,"0"],[27765.0,30562.3,"0"],[30636.0,29414.7,"0"],[46653.0,45865.4,"0"],[34741.0,30128.7,"0"],[33158.0,34732.7,"0"],[55715.0,49707.9,"0"],[49779.0,48162.1,"0"],[86065.0,81770.2,"1"],[47692.0,45228.8,"0"],[20315.0,25472.0,"0"],[64712.2,66332.0,"1"],[51263.0,50030.7,"1"],[52855.0,54191.3,"0"],[47828.0,50369.5,"1"],[32693.0,31560.8,"0"],[23931.0,20334.2,"0"],[45867.0,41456.8,"0"],[19789.0,18857.9,"0"],[29094.0,32989.4,"0"],[49615.0,54466.5,"1"],[27778.0,32672.4,"0"],[69358.0,65733.6,"1"],[45794.0,44925.1,"0"],[56893.0,57075.5,"1"],[60263.0,60206.0,"1"],[45452.8,44823.5,"1"],[32309.0,31131.4,"0"],[35739.0,34383.5,"0"],[75349.0,65150.8,"0"],[30465.0,34610.0,"0"],[39618.0,37536.2,"0"],[76820.2,78616.8,"1"],[85594.2,86631.1,"1"],[19776.0,32433.7,"0"],[12716.0,19558.7,"0"],[42603.0,49915.1,"1"],[35186.0,44938.6,"0"],[36739.0,38233.9,"0"],[53386.0,52323.3,"0"],[32986.0,32532.8,"0"],[49962.0,48503.0,"0"],[36235.0,40409.0,"0"],[51415.0,50999.3,"1"],[29523.0,31760.2,"0"],[98018.8,106421.1,"1"],[92110.0,91885.0,"1"],[60914.0,53995.6,"0"],[33001.0,31382.6,"0"],[31202.0,34057.5,"0"],[54236.0,50898.5,"0"],[31405.0,36109.6,"0"],[37901.0,39603.2,"0"],[83624.0,80268.9,"1"],[45028.0,40866.7,"0"],[60215.8,64033.7,"1"],[33264.0,34125.0,"0"],[90653.2,96063.2,"1"],[28174.0,28254.0,"0"],[51895.8,45252.3,"1"],[44933.8,49790.8,"0"],[29610.0,38113.7,"0"],[32253.0,32513.4,"0"],[44415.0,56273.4,"1"],[51129.0,46222.6,"0"],[36529.0,40139.4,"0"],[60084.2,59234.0,"1"],[52841.0,54839.9,"1"],[88313.0,87653.6,"1"],[37420.0,31865.9,"0"],[29874.0,32936.0,"0"],[63583.0,65642.6,"1"],[52531.0,43897.6,"0"],[40257.0,40884.7,"0"],[17526.0,25837.5,"0"],[45066.0,48661.4,"1"],[45202.0,42950.4,"0"],[97246.0,89847.1,"1"],[27715.0,31294.8,"0"],[41599.0,42137.6,"0"],[56727.0,53615.7,"0"],[28466.0,29995.5,"0"],[31616.0,33997.7,"0"],[30331.0,30180.3,"0"],[55536.0,54645.2,"0"],[31243.0,28275.5,"0"],[42346.0,45876.4,"0"],[37697.0,29286.5,"1"],[66768.0,63649.7,"1"],[22304.0,20802.1,"0"],[52062.0,50800.8,"1"],[45368.0,46148.6,"0"],[79306.0,79616.7,"1"],[25205.0,23317.0,"0"],[16666.0,20504.7,"0"],[28227.0,25999.8,"0"],[24699.0,26907.2,"0"],[39973.0,40020.9,"1"],[39574.0,37194.6,"0"],[46364.0,43907.4,"0"],[29568.0,28763.0,"0"],[30831.0,25580.7,"0"],[49882.0,51402.6,"1"],[32762.0,39058.2,"0"],[43776.0,45588.5,"0"],[55203.0,55797.2,"1"],[41974.0,43331.8,"0"],[47553.0,45855.6,"0"],[16510.0,14484.1,"0"],[34816.0,29976.0,"0"],[49623.0,49429.1,"0"],[31104.0,31592.9,"0"],[26835.0,30148.0,"0"],[46431.0,48782.3,"1"],[61737.0,61007.1,"0"],[36916.0,35006.1,"0"],[43455.0,41919.2,"1"],[32721.0,34932.7,"0"],[45216.0,46201.3,"1"],[34914.0,37645.5,"0"],[33617.0,33888.6,"0"],[76225.0,69787.3,"1"],[36473.0,34261.8,"1"],[34288.0,31339.5,"0"],[40979.0,40789.5,"0"],[33714.0,30624.6,"0"],[47889.0,46396.0,"0"],[46192.0,45713.9,"0"],[27145.8,24893.4,"0"],[64367.0,65331.3,"1"],[36234.0,33587.3,"0"],[35255.0,32876.3,"0"],[35224.0,35039.4,"0"],[40872.0,40214.2,"0"],[100344.8,94848.1,"1"],[36910.0,36608.6,"0"],[30921.0,34366.9,"0"],[39735.0,31279.9,"1"],[36859.0,36378.2,"0"],[62543.0,59079.0,"0"],[50279.8,47737.7,"1"],[24679.0,26337.6,"0"],[38043.0,41864.5,"0"],[54972.0,57801.9,"0"],[31385.0,28103.6,"0"],[80489.8,77326.0,"1"],[35978.0,38869.2,"0"],[36253.0,34625.1,"0"],[44197.0,44441.1,"0"],[33432.0,32173.6,"0"],[87594.2,83436.9,"1"],[36208.0,36588.5,"0"],[66414.0,64217.9,"1"],[28896.0,28311.2,"0"],[32231.0,33689.1,"0"],[77514.8,84961.0,"1"],[40753.0,39432.9,"1"],[23548.0,33934.2,"0"],[70860.0,73167.7,"1"],[46580.0,51734.9,"1"],[56359.2,57838.8,"1"],[35089.8,35849.0,"0"],[78134.0,78175.3,"1"],[39632.8,39942.8,"0"],[58035.8,58107.7,"0"],[35975.0,41974.7,"0"],[47201.0,46992.2,"1"],[55728.0,60421.5,"1"],[70349.0,69366.9,"1"],[31957.0,33912.7,"0"],[34042.0,35510.8,"0"],[24415.0,26991.1,"1"],[48384.8,44002.1,"1"],[42017.0,39756.1,"0"],[36566.0,35213.7,"0"],[60670.8,58898.5,"0"],[61747.2,57485.8,"1"],[43194.0,45530.3,"0"],[15352.0,11536.6,"0"],[31581.0,34372.5,"0"],[34745.0,34842.8,"0"],[31807.0,35493.7,"0"],[43078.0,41969.8,"0"],[38371.0,35056.7,"0"],[32291.0,29232.2,"0"],[58001.0,64638.9,"1"],[68753.0,60721.4,"1"],[33304.0,29632.0,"0"],[49180.0,50081.6,"1"],[84297.2,81559.2,"1"],[56897.0,50561.3,"0"],[59301.8,58453.6,"1"],[30509.0,33451.3,"0"],[74051.2,67927.5,"1"],[44434.0,44712.5,"0"],[31851.0,33115.3,"1"],[36484.0,32218.6,"0"],[64499.0,60160.1,"1"],[37856.0,42201.6,"1"],[81161.2,82178.4,"1"],[48758.0,46842.2,"1"],[38380.0,37893.5,"0"],[72631.0,72728.9,"1"],[44876.0,44801.0,"0"],[43309.0,44413.8,"0"],[39529.0,37543.2,"0"],[58661.0,59351.1,"1"],[51785.8,51282.8,"0"],[19684.0,16185.7,"0"],[47985.0,46627.3,"0"],[44671.0,50583.9,"0"],[50005.0,48219.6,"1"],[60257.0,53944.5,"0"],[37195.2,38614.6,"1"],[31723.0,33103.2,"0"],[18484.0,26058.9,"0"],[41350.8,37801.8,"1"],[31308.0,31966.6,"0"],[22788.0,22792.1,"0"],[39063.0,38347.3,"0"],[40404.0,38912.5,"0"],[41419.0,40648.8,"0"],[31107.0,34892.4,"0"],[63613.0,62401.7,"1"],[27497.0,31899.4,"0"],[27173.0,24806.2,"0"],[15359.0,14458.4,"0"],[53653.0,51750.3,"0"],[61644.0,56488.5,"1"],[26407.0,27378.8,"0"],[58289.2,55850.3,"0"],[47182.0,47028.5,"1"],[42673.8,40449.6,"0"],[44074.0,44542.4,"0"],[65535.0,64779.8,"1"],[32623.0,31335.8,"0"],[58539.0,64433.5,"1"],[43335.0,43823.6,"0"],[84061.0,80252.3,"1"],[41016.0,40018.2,"0"],[29413.0,30685.2,"0"],[41887.0,49546.8,"1"],[24296.0,20867.3,"0"],[49246.0,50682.2,"0"],[56151.8,55620.1,"1"],[60711.8,60270.3,"0"],[43446.0,40911.9,"0"],[60620.0,56254.4,"0"],[49871.0,47162.7,"0"],[70564.0,74617.9,"1"],[58760.0,55266.4,"0"],[31292.0,37797.5,"0"],[22314.0,23720.8,"0"],[44843.0,43392.8,"0"],[35188.0,37752.3,"0"],[51006.0,55243.0,"1"],[31945.0,34859.3,"0"],[37268.0,35215.5,"0"],[39880.0,40047.8,"0"],[41119.8,41220.5,"0"],[23496.0,26996.0,"0"],[36643.0,37503.8,"0"],[42252.0,42582.9,"0"],[38265.0,38210.7,"0"],[29546.0,28949.1,"0"],[47514.0,32486.6,"0"],[22801.0,23245.2,"0"],[32814.8,29931.8,"0"],[80306.0,84339.3,"1"],[33035.0,32249.3,"1"],[94540.8,83537.4,"1"],[34005.0,32794.5,"0"],[13593.0,15787.9,"0"],[20563.0,21404.2,"0"],[24533.0,26094.9,"0"],[50619.0,52193.7,"1"],[51764.0,58176.9,"0"],[51564.0,51341.1,"0"],[47526.2,51783.3,"1"],[46695.0,45440.5,"0"],[38282.0,37228.7,"0"],[33070.0,33466.3,"0"],[68164.2,75930.1,"1"],[32602.0,31546.9,"0"],[43828.0,45654.0,"1"],[40848.0,39961.3,"0"],[15563.0,16329.8,"0"],[63803.0,67593.2,"1"],[36972.0,39037.2,"0"],[34897.8,35221.9,"0"],[102613.0,93113.5,"1"],[47513.0,55645.1,"1"],[66669.0,71389.9,"1"],[42314.0,41899.6,"0"],[32132.0,29294.1,"0"],[41437.0,41135.6,"0"],[38566.0,40821.7,"1"],[38647.0,39557.5,"0"],[45303.0,42991.4,"0"],[49706.0,48768.0,"0"],[41479.0,40577.8,"0"],[43727.0,45363.8,"1"],[62388.0,66486.0,"1"],[85396.2,87666.0,"1"],[38979.0,38113.2,"1"],[42675.0,42431.0,"0"],[59633.8,57057.3,"0"],[36999.0,37913.2,"0"],[37497.8,32680.6,"0"],[23935.0,23498.7,"0"],[19397.0,19569.2,"0"],[69335.0,69852.8,"1"],[29744.0,37063.6,"0"],[35536.0,35924.3,"0"],[60475.0,62539.1,"1"],[64837.0,59603.0,"0"],[17461.0,18761.2,"0"],[33924.0,34680.0,"1"],[26379.8,24766.1,"0"],[42458.8,39734.6,"1"],[46088.8,46130.4,"0"],[71530.0,68309.3,"1"],[28217.0,26725.0,"0"],[26583.0,27488.9,"0"],[23384.0,25919.1,"0"],[23011.0,24728.3,"0"],[23510.0,26449.2,"0"],[40634.8,36264.7,"0"],[16405.0,18784.3,"0"],[50991.0,48356.4,"1"],[19117.0,16445.9,"0"],[48836.0,48882.7,"0"],[55582.0,56609.3,"1"],[45556.0,43984.1,"0"],[43068.0,41270.9,"1"],[44200.8,45205.3,"0"],[33568.0,33932.1,"0"],[63735.0,59786.2,"0"],[50404.0,52299.3,"1"],[34501.8,29198.1,"0"],[61618.8,66806.5,"1"],[46542.0,43279.4,"0"],[59505.0,55997.7,"1"],[49441.0,50236.7,"1"],[39289.0,39924.8,"0"],[50211.0,48283.0,"1"],[37307.0,40455.8,"0"],[69070.0,72635.8,"1"],[23129.0,25189.1,"0"],[23012.0,20946.9,"0"],[67661.0,64496.3,"1"],[23528.0,25151.7,"0"],[47906.0,50003.3,"1"],[48435.0,43192.4,"0"],[52886.8,59914.0,"1"],[30160.0,29462.4,"0"],[15996.0,16106.6,"0"],[40763.0,40520.7,"0"],[24601.0,20780.3,"0"],[30855.0,32696.2,"0"],[39094.0,36415.1,"0"],[42360.0,43471.7,"1"],[26941.0,26202.6,"0"],[43548.0,49629.9,"1"],[43297.0,40522.6,"1"],[13327.0,9671.1,"0"],[42463.8,43884.6,"0"],[30863.0,31199.4,"0"],[32416.0,34728.0,"0"],[57741.0,55918.9,"1"],[48316.0,61326.5,"1"],[34511.0,35434.0,"0"],[34987.0,39324.2,"0"],[53970.0,53488.5,"1"],[35245.0,35839.6,"1"],[33503.0,37933.0,"0"],[31210.0,32010.5,"0"],[25839.0,26918.0,"0"],[33834.0,35208.3,"0"],[46126.8,43986.5,"0"],[39099.0,39104.4,"0"],[32740.0,33088.1,"0"],[41243.0,42485.6,"1"],[39517.0,37180.9,"0"],[30291.0,29293.1,"0"],[37823.0,36033.4,"1"],[77478.5,77805.3,"1"],[38276.0,36312.5,"0"],[28453.0,33469.4,"0"],[72027.2,73875.3,"1"],[27540.0,28058.2,"0"],[37245.0,36269.5,"0"],[62398.2,62520.0,"1"],[72006.0,79533.0,"1"],[30211.0,31875.6,"0"],[70060.0,75942.8,"1"],[43723.8,50573.0,"0"],[37956.0,42455.9,"0"],[31217.0,31414.5,"0"],[27436.0,25787.1,"0"],[56284.0,57413.4,"0"],[17618.0,17710.2,"0"],[39997.0,38457.3,"1"],[68451.0,68719.6,"1"],[44302.0,45374.5,"0"],[40588.0,42124.8,"1"],[25752.0,20926.9,"0"],[24993.0,28570.1,"0"],[41036.0,40321.2,"0"],[29676.0,19019.9,"0"],[34441.0,33733.0,"0"],[47618.0,41932.3,"1"],[29325.0,29855.2,"0"],[22702.0,26334.7,"0"],[23598.0,27574.7,"0"],[56405.0,56462.4,"1"],[47935.0,49414.8,"0"],[35076.8,33101.6,"0"],[42884.0,44294.6,"0"],[45053.0,46993.9,"0"],[23874.0,20712.1,"0"],[32744.0,36015.8,"0"],[45459.0,43090.2,"0"],[33671.0,36010.9,"0"],[41064.8,38138.7,"0"],[62301.0,54768.8,"0"],[28900.0,32415.3,"0"],[32841.0,34670.0,"0"],[22198.0,19818.7,"0"],[53098.8,54252.1,"1"],[56444.8,60133.4,"1"],[32468.0,31879.1,"0"],[68161.2,74024.0,"1"],[48342.0,45422.2,"1"],[16890.0,19058.9,"0"],[45816.0,45645.7,"0"],[31843.0,29694.6,"0"],[36769.0,37190.6,"0"],[37585.0,35257.7,"0"],[52224.0,54663.3,"1"],[44457.0,43573.1,"0"],[24844.0,19736.8,"0"],[48164.0,54144.4,"1"],[25392.0,27548.4,"0"],[35940.0,34714.5,"0"],[40226.0,40277.4,"0"],[63892.0,61785.1,"1"],[47986.0,47164.7,"0"],[64334.0,59595.3,"0"],[50361.8,50014.1,"0"],[34231.0,34591.0,"1"],[37507.0,37023.8,"0"],[14380.0,13963.2,"0"],[62798.0,60357.9,"0"],[38689.0,37826.4,"0"],[39764.2,45468.1,"1"],[43652.0,41786.7,"1"],[42455.0,38045.4,"1"],[41481.0,45101.1,"0"],[30263.0,32230.1,"0"],[18561.0,16763.8,"0"],[89411.8,93091.1,"1"],[38952.0,36560.6,"1"],[46142.0,49260.8,"0"],[35490.2,38015.2,"0"],[19671.0,21874.5,"0"],[22708.0,24610.9,"0"],[26434.0,24726.7,"0"],[49123.0,47036.6,"1"],[27697.0,25037.3,"0"],[52418.8,54136.5,"1"],[54862.0,60584.3,"1"],[24228.0,25447.2,"0"],[42945.0,41065.2,"0"],[41645.0,34813.4,"0"],[32685.0,33570.4,"0"],[32750.2,32332.1,"0"],[27706.0,34210.2,"0"],[34274.0,35185.5,"1"],[24438.0,21158.1,"0"],[40602.8,42057.8,"0"],[42292.0,43409.5,"0"],[36831.0,39260.8,"0"],[19882.0,20711.1,"0"],[27386.0,27969.3,"0"],[20291.0,21845.9,"0"],[20604.0,22659.5,"0"],[52380.0,54279.1,"1"],[35566.0,34474.7,"1"],[42181.0,43240.5,"0"],[40614.0,42428.2,"0"],[85357.0,79818.6,"1"],[68610.0,62994.8,"1"],[32058.0,34674.5,"0"],[39327.0,38756.8,"0"],[44704.0,47548.5,"1"],[32868.0,32966.2,"0"],[65873.5,67317.7,"1"],[39253.0,40516.4,"0"],[26597.0,27419.3,"0"],[54447.0,48414.5,"0"],[56235.0,54634.1,"0"],[51574.0,52916.4,"0"],[21538.0,23217.5,"0"],[29999.0,35297.4,"0"],[21010.0,25994.9,"0"],[44381.0,42746.3,"1"],[29902.0,32024.6,"0"],[47705.0,47863.7,"0"],[72020.0,70640.6,"1"],[15540.0,19635.2,"0"],[36143.0,36674.4,"0"],[67208.0,71751.8,"1"],[76043.0,73870.2,"1"],[61053.0,59051.9,"1"],[52241.5,47613.7,"1"],[39319.0,38912.2,"0"],[43231.0,44233.2,"0"],[27653.0,28186.3,"0"],[76292.0,74046.8,"1"],[36874.8,36587.7,"0"],[44262.8,39089.3,"1"],[50497.0,51713.5,"1"],[33072.0,40039.0,"0"],[19592.0,22397.7,"0"],[62331.8,64663.3,"1"],[23942.0,27050.5,"0"],[34600.0,33334.0,"1"],[29865.8,28631.7,"0"],[47525.8,45991.0,"0"],[57176.2,59214.2,"1"],[38302.0,40638.7,"0"],[31289.0,29279.2,"0"],[24505.0,22612.5,"0"],[21909.0,19634.5,"0"],[29578.0,29796.1,"0"],[38708.0,38386.6,"0"],[38050.0,38356.9,"0"],[49695.0,53837.5,"0"],[71900.0,74476.1,"1"],[43987.0,46301.5,"0"],[31043.0,31511.1,"0"],[63145.0,60542.9,"1"],[63458.0,75773.6,"1"],[49064.0,49726.1,"0"],[46798.0,49624.7,"1"],[97339.8,86799.0,"1"],[49377.0,46180.5,"0"],[20043.0,26577.6,"0"],[47028.8,46274.2,"1"],[38057.0,35793.6,"0"],[37663.0,40641.6,"0"],[44918.0,45713.0,"0"],[51865.2,53745.7,"0"],[23794.0,23263.2,"0"],[63602.0,64550.6,"1"],[28416.0,25748.3,"0"],[35823.0,20251.7,"1"],[36142.0,36712.0,"0"],[45949.0,43087.9,"0"],[19720.0,22754.7,"0"],[39302.0,37026.7,"0"],[31970.8,30061.6,"0"],[35045.0,30516.0,"0"],[62627.0,59102.0,"1"],[20589.0,18355.7,"0"],[25885.0,24413.1,"0"],[33430.0,34040.8,"0"],[66615.8,63768.2,"1"],[31669.0,34177.3,"0"],[48752.0,48092.3,"0"],[71555.0,69209.6,"1"],[43046.0,44552.8,"0"],[39195.0,40185.3,"0"],[44034.0,43378.0,"0"],[21737.0,18469.6,"0"],[30715.0,31159.3,"0"],[46323.0,44875.0,"0"],[21189.0,20551.1,"0"],[29070.0,26475.5,"0"],[26758.0,27887.5,"0"],[40666.0,44487.1,"0"],[36287.0,39374.7,"0"],[41757.0,48264.9,"0"],[38520.0,38958.4,"1"],[34516.0,33628.8,"0"],[47237.0,49288.8,"0"],[58198.0,53828.9,"0"],[53524.0,56053.2,"1"],[37877.0,41512.4,"0"],[41684.0,37321.4,"0"],[25476.0,26056.0,"0"],[31188.0,33902.7,"0"],[39057.0,40178.9,"0"],[46997.0,44557.9,"0"],[22835.0,24858.1,"0"],[40586.0,40187.2,"0"],[52114.0,49110.4,"0"],[43202.0,43472.2,"0"],[70960.0,73247.5,"1"],[40562.0,41114.9,"0"],[52142.0,51834.4,"1"],[37845.0,37013.1,"0"],[24665.0,26072.7,"0"],[28063.0,23789.3,"0"],[30251.0,29164.8,"0"],[24022.8,25030.7,"0"],[50285.0,48269.8,"0"],[46025.0,45700.4,"1"],[87989.0,84180.1,"1"],[51408.0,48382.7,"1"],[47153.0,47453.7,"0"],[64823.2,63043.1,"1"],[38115.0,38806.8,"0"],[38957.0,39793.0,"0"],[41029.2,41484.2,"0"],[30450.0,30405.4,"0"],[73825.0,72602.5,"1"],[17240.0,19101.4,"0"],[58922.0,57775.8,"0"],[39005.0,45700.4,"0"],[19172.0,16033.5,"0"],[44973.2,44290.3,"0"],[21943.0,24155.8,"0"],[35789.8,29574.7,"0"],[64128.0,61658.2,"0"],[39046.0,37885.2,"0"],[27205.0,31160.3,"0"],[31747.0,31232.5,"0"],[66727.0,65449.0,"1"],[30726.0,32534.4,"0"],[36522.0,36480.0,"0"],[54373.8,50483.6,"0"],[49873.0,53578.6,"1"],[54537.0,54065.0,"1"],[40796.0,39967.0,"0"],[29831.0,30788.4,"0"],[27516.0,27976.4,"1"],[46837.0,45100.4,"0"],[13911.0,17163.1,"0"],[40299.0,37766.2,"0"],[18442.0,20591.1,"0"],[87917.0,79604.9,"1"],[21950.0,29098.5,"0"],[36663.8,34725.1,"0"],[29536.0,32212.3,"0"],[46997.0,46225.9,"0"],[32183.0,30752.2,"1"],[40559.0,35865.5,"0"],[41971.0,43508.4,"1"],[24113.0,23622.0,"0"],[35675.0,36130.5,"0"],[37550.8,38400.1,"0"],[38185.0,37700.5,"0"],[26165.0,25678.7,"0"],[20157.0,28452.0,"0"],[17858.0,15594.1,"0"],[51788.0,51342.6,"0"],[68923.0,70498.9,"1"],[49278.0,46775.5,"1"],[43689.0,42271.2,"0"],[23542.0,21146.7,"0"],[59560.0,64296.3,"1"],[43247.0,42427.7,"0"],[25603.0,28324.5,"0"],[30008.0,29696.9,"0"],[30252.0,30685.7,"0"],[28970.0,30945.7,"0"],[89165.0,84972.6,"1"],[52371.0,52334.9,"0"],[46000.0,47458.3,"0"],[31956.0,31585.9,"0"],[37592.0,38052.6,"0"],[24423.0,23315.7,"0"],[41371.0,40225.8,"0"],[23984.0,23236.2,"0"],[23557.0,25831.3,"0"],[22422.0,19808.0,"0"],[25952.8,23423.9,"0"],[30817.0,32033.1,"0"],[32116.0,29670.7,"0"],[42285.0,46370.4,"1"],[42763.0,41069.1,"1"],[85329.8,80006.5,"1"],[32170.0,34332.6,"0"],[27132.0,27349.0,"0"],[66806.0,70725.7,"1"],[30070.0,34502.3,"0"],[39811.0,39195.0,"1"],[53162.0,51208.5,"1"],[59428.0,56369.3,"1"],[53508.0,46179.8,"1"],[49513.0,52188.1,"1"],[28738.0,28843.2,"0"],[36327.0,36573.7,"0"],[30551.0,33634.6,"0"],[57509.0,55890.4,"1"],[95528.0,83968.4,"1"],[70685.0,69983.6,"1"],[24051.0,24952.5,"0"],[40236.0,37951.7,"0"],[37637.0,37774.6,"0"],[75183.0,70339.4,"1"],[87127.2,87042.4,"1"],[38449.0,37658.4,"0"],[25471.0,23577.6,"0"],[52738.0,52376.1,"0"],[42899.0,45483.6,"0"],[53042.0,53626.8,"1"],[45966.0,45187.3,"0"],[74822.0,74939.7,"1"],[79813.0,79385.8,"1"],[36069.0,39841.3,"0"],[53228.0,50402.2,"0"],[20726.0,21343.5,"0"],[46115.0,49425.7,"1"],[43290.8,44101.4,"0"],[29254.0,28844.1,"0"],[22491.0,25834.2,"0"],[37309.0,38688.3,"0"],[51445.0,51168.1,"1"],[60957.2,61617.3,"1"],[52418.0,48101.5,"1"],[74278.0,70089.3,"1"],[37456.0,36641.1,"0"],[29290.0,29053.4,"0"],[25013.0,27005.1,"0"],[44977.0,46892.1,"1"],[42269.2,54601.5,"1"],[39422.0,40595.1,"0"],[38396.0,35913.0,"0"],[47694.0,48317.7,"0"],[59626.0,56656.8,"1"],[53693.8,50296.6,"0"],[45151.0,46697.8,"1"],[35807.8,35932.6,"0"],[32072.8,37828.7,"0"],[51371.0,53242.2,"1"],[37700.0,35594.9,"0"],[54075.0,57902.7,"1"],[23789.0,26216.0,"0"],[34484.0,34907.6,"0"],[36454.0,37472.2,"1"],[39471.0,40908.3,"0"],[23099.0,20290.9,"0"],[30928.0,36523.0,"0"],[47825.0,47004.2,"0"],[50530.0,46998.6,"0"],[44508.0,45827.5,"0"],[65187.2,66883.6,"1"],[35562.0,31852.2,"0"],[53084.0,50144.6,"1"],[56021.8,54422.6,"0"],[34861.0,38445.9,"0"],[40874.0,39286.7,"0"],[43033.0,41254.0,"0"],[36687.0,41502.6,"0"],[37145.0,38548.5,"0"],[37026.0,35217.6,"0"],[34161.0,33157.0,"0"],[81902.0,83883.5,"1"],[37540.0,39113.4,"0"],[30925.0,30802.3,"0"],[29276.0,29908.4,"0"],[40837.0,39825.9,"1"],[35617.0,36960.0,"0"],[31348.0,33759.8,"0"],[28439.0,27769.2,"0"],[33408.0,36400.9,"1"],[78594.0,73862.8,"1"],[59263.2,57707.0,"1"],[63134.8,66112.3,"1"],[63359.8,68752.7,"1"],[59664.8,54887.4,"0"],[52396.0,51141.6,"0"],[52084.0,47764.0,"0"],[41244.0,39444.9,"0"],[48085.2,54376.2,"1"],[41865.0,40999.3,"0"],[44752.0,47708.6,"1"],[45669.0,46369.3,"0"],[33812.8,37130.8,"0"],[31339.0,30019.6,"0"],[19152.0,18059.0,"0"],[22097.0,20177.4,"0"],[34693.8,39391.7,"1"],[48761.0,48070.5,"0"],[20726.0,27762.9,"0"],[18101.0,16803.4,"0"],[48971.8,52002.0,"1"],[23829.0,25472.6,"0"],[49748.0,46722.9,"0"],[65297.0,63062.5,"1"],[40743.0,44251.5,"0"],[32979.0,33110.1,"0"],[29639.0,29334.6,"0"],[25276.0,24455.6,"0"],[15160.0,14822.2,"0"],[42976.0,40368.7,"0"],[42435.8,42962.1,"0"],[44520.0,41824.2,"0"],[19162.0,17299.0,"0"],[52802.0,49330.8,"0"],[67865.2,66108.6,"1"],[77895.8,76157.0,"1"],[40881.0,40009.6,"0"],[49915.0,45425.4,"1"],[21855.0,23699.4,"0"],[41754.0,46089.6,"0"],[40974.8,39319.8,"1"],[31252.0,31273.1,"0"],[30747.0,37093.7,"0"],[59017.0,57504.6,"0"],[35391.0,40542.4,"1"],[31835.8,25950.3,"0"],[54081.8,49366.9,"0"],[39588.0,38160.6,"0"],[35371.0,34627.5,"0"],[52632.2,57667.4,"1"],[25045.0,23492.1,"1"],[32947.0,33142.5,"1"],[68520.0,72550.5,"1"],[42444.8,42341.1,"0"],[30485.0,28655.5,"0"],[51941.0,52800.2,"1"],[64613.0,62566.7,"1"],[43340.0,42178.2,"0"],[48982.0,45379.4,"0"],[42989.8,40203.7,"0"],[20209.0,20240.9,"0"],[70352.5,72780.8,"1"],[36333.0,36331.9,"0"],[56087.0,54074.3,"0"],[106465.8,87095.7,"1"],[37160.0,45020.9,"1"],[40745.0,41729.9,"1"],[53066.2,54194.6,"0"],[18688.0,20257.2,"0"],[39732.0,37782.7,"1"],[33731.0,46983.4,"1"],[53676.0,50923.5,"0"],[31503.0,33643.8,"0"],[103384.0,92023.5,"1"],[35493.0,34536.4,"0"],[36950.0,36900.8,"0"],[31633.0,33808.0,"0"],[28491.0,33678.5,"0"],[38171.0,38506.0,"0"],[27925.0,23009.7,"0"],[32469.0,38888.9,"0"],[61974.0,60010.9,"1"],[46923.0,45566.1,"0"],[45783.0,45612.3,"1"],[28188.0,32497.0,"0"],[36981.0,38010.1,"0"],[33873.0,34850.2,"0"],[36758.0,41540.3,"0"],[28984.0,30203.6,"0"],[45099.0,51216.4,"1"],[28388.0,30058.3,"0"],[49192.0,52948.9,"1"],[23685.0,25175.7,"0"],[36437.0,37628.9,"0"],[29283.0,30161.4,"0"],[20885.0,21113.5,"0"],[52746.0,50600.0,"0"],[45169.0,45831.7,"0"],[41441.0,42627.1,"0"],[48786.0,49693.6,"1"],[32916.0,31748.7,"0"],[60359.0,58119.7,"1"],[22468.0,25300.5,"0"],[30663.0,33300.2,"0"],[42717.0,41926.9,"0"],[27431.0,26829.2,"0"],[28256.8,29573.5,"0"],[27751.0,28161.0,"0"],[28229.0,27575.2,"0"],[37908.2,42926.6,"1"],[37105.2,38747.2,"0"],[23770.0,26302.3,"0"],[17647.0,17977.3,"0"],[27483.0,30842.0,"0"],[46685.0,51526.9,"1"],[63746.0,65836.5,"1"],[90456.0,86200.6,"1"],[63543.0,67006.4,"1"],[27349.0,26207.6,"0"],[45796.0,50963.7,"1"],[36883.0,38504.5,"1"],[35550.0,48093.1,"1"],[33017.0,37405.4,"0"],[46340.0,42518.8,"0"],[18244.0,21954.1,"0"],[36282.0,37711.7,"0"],[27613.0,32916.4,"0"],[64154.8,58172.5,"1"],[27557.0,26689.8,"0"],[17021.0,17522.9,"0"],[55024.0,50272.1,"0"],[53153.0,51245.0,"0"],[33749.8,31364.6,"0"],[28231.0,29519.5,"0"],[18755.0,15395.4,"0"],[42290.0,44575.0,"0"],[38014.2,39026.3,"1"],[44762.2,51649.6,"1"],[25570.0,25387.7,"0"],[41538.0,41884.3,"0"],[29341.0,30375.5,"0"],[14945.0,21241.2,"0"],[66719.0,65817.8,"1"],[58519.0,54328.2,"1"],[56706.0,60170.5,"1"],[47146.0,49519.0,"0"],[64870.0,62591.7,"1"],[23442.0,19879.4,"0"],[36138.0,36487.7,"0"],[30025.0,30596.1,"0"],[43066.0,49075.8,"0"],[33484.0,36682.9,"0"],[31009.8,27452.4,"0"],[38568.0,47224.9,"0"],[33500.0,32566.4,"0"],[22878.0,24365.2,"0"],[19457.0,21313.4,"0"],[37092.0,37179.9,"0"],[25672.0,28620.8,"0"],[48776.0,47283.5,"0"],[44008.8,44109.1,"0"],[56402.0,52781.9,"1"],[47564.0,47383.2,"1"],[41828.0,41944.1,"1"],[67035.0,69515.3,"1"],[40607.0,40979.8,"0"],[29755.0,28130.9,"0"],[66144.0,65178.6,"1"],[59755.0,61189.0,"1"],[44994.0,43767.4,"1"],[53095.0,51292.4,"0"],[39009.0,38055.8,"0"],[77598.0,77747.9,"1"],[30255.0,30977.2,"1"],[39310.8,36616.5,"0"],[33506.0,33654.5,"0"],[65500.0,68632.2,"1"],[37315.0,39525.1,"1"],[48676.0,51447.0,"1"],[37562.0,36101.9,"1"],[44999.0,45067.6,"0"],[30168.0,34572.4,"0"],[26250.0,30791.4,"0"],[55829.0,61385.6,"1"],[27037.0,27654.0,"0"],[51320.0,50733.4,"0"],[18823.0,16335.0,"0"],[88727.5,85597.5,"1"],[22306.0,25827.9,"0"],[46601.0,47950.1,"1"],[38138.0,36225.0,"0"],[44073.0,44713.3,"1"],[60106.0,59348.8,"1"],[32835.0,32457.4,"0"],[36082.0,33730.4,"0"],[33234.0,31225.3,"0"],[46832.0,45470.7,"0"],[30489.2,31249.8,"0"],[52640.0,50945.0,"1"],[53542.0,51422.9,"0"],[34644.0,34566.2,"0"],[39657.0,38396.2,"0"],[49403.2,57732.6,"1"],[43451.0,45682.3,"0"],[51485.0,51403.2,"0"],[42689.0,46038.0,"0"],[60087.0,56697.0,"1"],[26995.0,30091.0,"0"],[27694.0,28202.2,"0"],[36263.0,39172.4,"0"],[39931.0,41293.0,"1"],[46612.0,47565.7,"0"],[15094.0,12861.6,"0"],[34393.8,34214.9,"0"],[30527.0,30911.6,"1"],[42265.0,42465.6,"0"],[37033.0,37661.1,"0"],[36365.0,39771.6,"0"],[25560.0,27689.8,"0"],[50912.8,54875.7,"1"],[37408.0,38755.7,"1"],[33998.8,30725.8,"1"],[63927.0,63847.5,"1"],[29187.8,26826.0,"0"],[32644.0,29567.7,"0"],[25709.0,24291.7,"0"],[40770.0,40960.6,"0"],[16695.0,12513.2,"0"],[28932.0,29790.6,"0"],[56440.0,55951.6,"1"],[46858.0,45674.9,"0"],[33760.0,33789.8,"0"],[52367.0,51584.2,"1"],[43822.0,43406.3,"0"],[31309.0,31150.6,"1"],[28384.0,26439.2,"0"],[48072.0,48809.6,"0"],[18646.0,23310.4,"0"],[21654.0,21572.7,"0"],[32432.8,22738.9,"0"],[41842.0,43143.1,"0"],[54043.0,54361.0,"1"],[23154.0,27111.8,"0"],[49403.0,49413.7,"0"],[24362.0,22626.3,"0"],[30374.0,32166.3,"0"],[37550.0,38780.0,"0"],[42722.0,42106.7,"0"],[64420.0,63002.9,"0"],[33000.0,32727.0,"0"],[37473.0,41031.8,"0"],[29341.0,28633.8,"0"],[46848.0,45820.1,"1"],[37886.0,39502.8,"0"],[27846.0,30396.3,"0"],[56481.2,59082.1,"1"],[26423.0,27049.7,"0"],[49044.0,46475.1,"0"],[28104.0,22732.1,"1"],[40628.0,42149.1,"0"],[25759.0,30123.4,"0"],[33267.0,33462.7,"0"],[25830.0,30524.5,"0"],[52201.0,50728.0,"1"],[24905.0,28905.7,"0"],[50336.8,47902.5,"1"],[63274.0,59342.9,"1"],[55978.0,54866.9,"0"],[34043.8,33726.2,"0"],[44227.0,45354.4,"0"],[33938.0,33742.5,"0"],[38027.0,42661.9,"1"],[35923.0,36748.2,"0"],[38928.0,37795.3,"1"],[39914.2,41319.4,"1"],[74848.0,75684.8,"1"],[45032.8,44064.1,"1"],[30995.0,31231.3,"0"],[49071.0,55111.3,"0"],[31874.0,32030.5,"0"],[44004.0,46334.6,"0"],[28495.0,32471.8,"0"],[32244.0,36077.8,"0"],[57483.0,58687.4,"1"],[33212.0,38366.5,"0"],[47889.8,44635.1,"1"],[33073.0,34535.2,"0"],[32792.0,32358.9,"0"],[38066.0,40184.8,"0"],[39395.0,39234.0,"1"],[40635.0,46793.1,"0"],[43007.0,42217.7,"0"],[19892.0,19016.8,"0"],[22734.0,23229.8,"0"],[29736.0,30953.7,"0"],[18197.0,11615.5,"1"],[22254.0,16637.2,"0"],[30276.0,33347.5,"0"],[44924.0,45342.0,"0"],[66045.0,60294.8,"0"],[33346.0,33805.1,"0"],[28449.0,30022.1,"0"],[27001.0,26620.5,"0"],[59775.2,63105.9,"1"],[42050.0,42109.5,"0"],[58760.0,58847.6,"1"],[48105.8,41850.9,"0"],[60947.0,62149.9,"1"],[30106.0,29943.9,"0"],[16445.0,22182.0,"0"],[38049.0,38267.3,"0"],[31551.0,32018.1,"0"],[55346.0,50621.0,"0"],[24085.0,25205.2,"0"],[34823.0,37291.6,"0"],[27041.0,27864.8,"0"],[17749.0,16538.9,"0"],[37047.0,41786.8,"0"],[40746.2,39737.1,"1"],[18081.0,16378.1,"0"],[18698.0,20849.1,"0"],[37324.0,37936.6,"1"],[38313.0,37933.5,"0"],[48968.0,47971.1,"0"],[24657.0,24744.5,"0"],[51163.0,52484.3,"1"],[54059.0,60852.3,"1"],[26561.0,30062.9,"0"],[34862.0,33898.6,"0"],[26988.2,29454.9,"0"],[32746.0,35817.7,"1"],[61038.8,57644.9,"1"],[24119.0,24296.2,"0"],[20608.0,25443.0,"0"],[29017.0,29953.6,"0"],[30583.0,29332.5,"0"],[36838.0,38499.5,"1"],[29292.0,34091.4,"0"],[49036.8,45621.1,"1"],[61134.8,60115.2,"1"],[56173.0,62464.9,"1"],[29285.0,28510.2,"0"],[26112.0,24131.9,"1"],[22144.0,23426.2,"0"],[29620.0,28375.3,"1"],[39047.0,34596.6,"0"],[79205.0,78170.4,"1"],[75170.0,71928.5,"1"],[52210.0,58153.2,"1"],[50588.0,48958.2,"0"],[47295.0,47583.1,"0"],[34831.0,34841.2,"0"],[49047.0,47477.0,"0"],[76330.0,78183.3,"1"],[33094.0,39254.0,"1"],[59493.0,55585.9,"0"],[21993.0,24738.8,"0"],[47881.0,47672.5,"1"],[44963.0,43645.0,"1"],[46664.0,49374.5,"1"],[35924.0,33552.1,"0"],[44614.0,44502.8,"0"],[34353.8,33739.3,"0"],[51947.0,45245.4,"1"],[37767.0,36571.3,"1"],[19251.0,19546.1,"0"],[44676.0,46736.3,"0"],[35648.0,35697.1,"0"],[78647.0,75999.9,"1"],[47745.0,44335.8,"0"],[42816.2,44048.6,"0"],[28261.0,27571.3,"0"],[56712.0,58176.3,"1"],[51320.0,50111.4,"1"],[53704.0,56003.3,"1"],[39966.0,37840.5,"0"],[51470.0,51931.2,"0"],[56502.0,55515.6,"1"],[34762.0,34176.9,"0"],[64389.0,60809.7,"1"],[46365.0,47057.5,"0"],[27565.0,28898.6,"0"],[28449.0,27134.3,"0"],[18493.0,15422.6,"0"],[36588.0,38084.5,"0"],[59357.0,65081.6,"1"],[25792.0,25548.9,"0"],[23043.0,31117.4,"0"],[49008.0,44922.1,"0"],[25863.0,28305.6,"0"],[49737.0,47251.8,"1"],[26855.0,29055.8,"0"],[28127.0,28472.7,"0"],[19200.0,15449.7,"0"],[43462.0,43719.4,"1"],[46641.0,47144.4,"0"],[35695.0,34003.6,"0"],[51858.0,50955.1,"1"],[34276.0,35740.0,"0"],[21318.0,22407.5,"0"],[21880.0,25642.5,"0"],[38517.0,38746.3,"1"],[39000.0,39053.1,"0"],[39478.0,39405.0,"1"],[51475.0,51226.2,"0"],[28228.0,27649.7,"1"],[37079.0,38513.8,"0"],[22338.0,26480.5,"0"],[18269.0,14475.2,"0"],[25896.0,26652.0,"0"],[32696.0,32256.5,"0"],[40698.8,40832.2,"0"],[43467.0,41675.8,"0"],[38994.0,39247.9,"0"],[44207.0,43402.9,"1"],[65240.0,58742.2,"0"],[27017.0,28692.2,"0"],[48749.0,48292.5,"0"],[33302.0,34639.5,"0"],[32451.0,33558.2,"0"],[37542.0,40254.7,"0"],[46246.0,47868.9,"0"],[49613.8,51379.5,"1"],[38291.8,39177.7,"0"],[29792.0,30801.8,"0"],[38138.0,34741.9,"0"],[60693.0,66931.7,"1"],[14219.0,5419.0,"0"],[42136.0,42446.7,"0"],[48648.8,48042.6,"1"],[42546.0,44181.0,"0"],[38100.0,40331.1,"1"],[42881.0,42068.7,"0"],[35398.0,34173.9,"0"],[44064.8,40495.6,"1"],[32496.0,32578.8,"0"],[55187.0,52536.3,"0"],[38941.8,39401.6,"0"],[30937.0,30078.0,"0"],[45605.0,43656.9,"0"],[44290.0,44265.0,"0"],[41434.0,41668.3,"0"],[55096.2,59523.0,"1"],[42009.0,42177.6,"0"],[44636.0,42709.2,"0"],[28711.0,29318.5,"0"],[39999.0,39701.7,"0"],[37445.0,36770.3,"0"],[19893.0,19253.9,"0"],[51441.2,56256.2,"1"],[53723.2,59177.7,"1"],[12244.0,14893.7,"0"],[31428.0,30814.2,"0"],[24180.0,25469.8,"0"],[67947.0,58139.0,"0"],[24068.0,22491.8,"0"],[45831.0,45107.6,"0"],[38175.0,43914.4,"1"],[52994.0,50072.0,"0"],[57443.0,57713.6,"1"],[32065.2,33940.1,"0"],[23034.0,26132.3,"0"],[19940.0,19936.1,"0"],[54525.8,52470.5,"0"],[44607.0,44882.2,"1"],[55879.8,50410.3,"1"],[39324.0,42439.9,"1"],[36633.0,38247.5,"0"]];
+// ──────────────────────────────────
+// INIT CHARTS
+// ──────────────────────────────────
+window.addEventListener('load', () => {
 
-const c0pts = scatterRaw.filter(d=>d[2]==="0").map(d=>({x:d[0],y:d[1]}));
-const c1pts = scatterRaw.filter(d=>d[2]==="1").map(d=>({x:d[0],y:d[1]}));
-
-new Chart(document.getElementById('scatterChart'), {
-  type: 'scatter',
-  data: {
-    datasets: [
-      { label: 'Cluster 0 – Base activa', data: c0pts, backgroundColor: C0+'55', borderColor: C0+'99', pointRadius: 3, pointHoverRadius: 5 },
-      { label: 'Cluster 1 – Perfil competitivo', data: c1pts, backgroundColor: C1+'55', borderColor: C1+'99', pointRadius: 3, pointHoverRadius: 5 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 11 } } },
-      tooltip: { callbacks: { label: ctx => `Kills: ${ctx.parsed.x.toLocaleString()} → Pred: ${ctx.parsed.y.toLocaleString()}` } }
+  // 1. Perfil distribution
+  new Chart(document.getElementById('cPerfil'), {
+    type: 'bar',
+    data: {
+      labels: ['Base activa / rendimiento medio','Perfil competitivo / alto rendimiento'],
+      datasets: [{ data:[970,465],
+        backgroundColor: ctx => { const g=ctx.chart.ctx.createLinearGradient(0,0,200,0); g.addColorStop(0,'#1e90d6cc'); g.addColorStop(1,'#4ec9e8cc'); return g; },
+        borderColor:[BLUE,SKY], borderWidth:1, borderRadius:6 }]
     },
-    scales: {
-      x: { title: { display: true, text: 'Kills Reales', color: '#64748b', font: { size: 11 } }, grid: { color: '#1e2d45' }, ticks: { color: '#64748b' } },
-      y: { title: { display: true, text: 'Kills Predichas', color: '#64748b', font: { size: 11 } }, grid: { color: '#1e2d45' }, ticks: { color: '#64748b' } }
+    options: {
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.raw} jugadores (${((c.raw/1435)*100).toFixed(1)}%)`}} },
+      scales:{
+        x:{ grid:{color:'#142235'}, ticks:{color:'#4a6f8a'} },
+        y:{ grid:{display:false}, ticks:{color:'#7aabcc', font:{size:11}} }
+      }
     }
-  }
+  });
+
+  // 2. Scatter
+  const c0 = SCATTER.filter(d=>d[2]==="0").map(d=>({x:d[0],y:d[1]}));
+  const c1 = SCATTER.filter(d=>d[2]==="1").map(d=>({x:d[0],y:d[1]}));
+  new Chart(document.getElementById('cScatter'), {
+    type:'scatter',
+    data:{ datasets:[
+      {label:'Cluster 0',data:c0,backgroundColor:BLUE+'44',borderColor:BLUE+'88',pointRadius:2.5,pointHoverRadius:5},
+      {label:'Cluster 1',data:c1,backgroundColor:SKY+'44',borderColor:SKY+'88',pointRadius:2.5,pointHoverRadius:5}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>` Kills: ${c.parsed.x.toLocaleString()} → Pred: ${c.parsed.y.toLocaleString()}`}} },
+      scales:{
+        x:{title:{display:true,text:'Kills Reales',color:'#4a6f8a',font:{size:10}}, grid:{color:'#142235'}, ticks:{color:'#4a6f8a'}},
+        y:{title:{display:true,text:'Kills Predichas',color:'#4a6f8a',font:{size:10}}, grid:{color:'#142235'}, ticks:{color:'#4a6f8a'}}
+      }
+    }
+  });
+
+  // 3. Donut Real
+  new Chart(document.getElementById('cDonutR'), {
+    type:'doughnut',
+    data:{labels:['Rend. Normal','Alto Rend.'],datasets:[{data:[1076,359],backgroundColor:[BLUE+'aa',SKY+'cc'],borderColor:'#070f1c',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#4a6f8a',boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:c=>` ${c.raw} (${((c.raw/1435)*100).toFixed(1)}%)`}}}}
+  });
+
+  // 4. Donut Pred
+  new Chart(document.getElementById('cDonutP'), {
+    type:'doughnut',
+    data:{labels:['Rend. Normal','Alto Rend.'],datasets:[{data:[1089,346],backgroundColor:[BLUE+'77',ICE+'cc'],borderColor:'#070f1c',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#4a6f8a',boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:c=>` ${c.raw} (${((c.raw/1435)*100).toFixed(1)}%)`}}}}
+  });
+
+  // 5. Cluster win ratio
+  new Chart(document.getElementById('cCluster'), {
+    type:'bar',
+    data:{
+      labels:['C0 Normal/Alta','C0 Bajo Eng.','C1 Normal/Alta','C1 Bajo Eng.'],
+      datasets:[{data:[5.17,5.95,12.39,12.56],
+        backgroundColor:[BLUE+'88',BLUE+'bb',SKY+'88',SKY+'cc'],
+        borderColor:[BLUE,BLUE,SKY,SKY], borderWidth:1, borderRadius:6}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#4a6f8a',font:{size:10}}},
+        y:{grid:{color:'#142235'},ticks:{color:'#4a6f8a',callback:v=>v+'%'},beginAtZero:true}
+      }
+    }
+  });
+
+  // 6. Kills per match
+  new Chart(document.getElementById('cKills'), {
+    type:'bar',
+    data:{
+      labels:['Alto rendimiento','Rendimiento normal'],
+      datasets:[{data:[2.80,1.69],
+        backgroundColor:[SKY+'cc',BLUE+'88'],
+        borderColor:[SKY,BLUE], borderWidth:1, borderRadius:8}]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'#142235'},ticks:{color:'#4a6f8a'},beginAtZero:true},
+        y:{grid:{display:false},ticks:{color:'#7aabcc'}}
+      }
+    }
+  });
+
+  // 7. Minutes by profile
+  new Chart(document.getElementById('cMinutes'), {
+    type:'bar',
+    data:{
+      labels:['Base activa /\nrendimiento medio','Perfil competitivo /\nalto rendimiento'],
+      datasets:[{data:[160365,145419],
+        backgroundColor:[BLUE+'cc',SKY+'cc'],
+        borderColor:[BLUE,SKY], borderWidth:1, borderRadius:6}]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} min (~${Math.round(c.raw/60)} hrs)`}}},
+      scales:{
+        x:{grid:{color:'#142235'},ticks:{color:'#4a6f8a',callback:v=>(v/1000).toFixed(0)+'k'}},
+        y:{grid:{display:false},ticks:{color:'#7aabcc',font:{size:11}}}
+      }
+    }
+  });
+
+  // 8. Matrix
+  new Chart(document.getElementById('cMatriz'), {
+    type:'bar',
+    data:{
+      labels:['Alta Act.\nx Alto Rend.','Alta Act.\nx Rend. Normal','Bajo Eng.\nx Alto Rend.','Bajo Eng.\nx Rend. Normal'],
+      datasets:[{data:[47341982,33178530,47341982,33178530],
+        backgroundColor:[SKY+'cc',BLUE+'88',SKY+'88',BLUE+'55'],
+        borderColor:[SKY,BLUE,SKY,BLUE], borderWidth:1, borderRadius:6}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` Score: ${(c.raw/1e6).toFixed(1)}M`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#4a6f8a',font:{size:10}}},
+        y:{grid:{color:'#142235'},ticks:{color:'#4a6f8a',callback:v=>(v/1e6).toFixed(0)+'M'},beginAtZero:true}
+      }
+    }
+  });
 });
 
-// ── 3. DONUT REAL ──
-new Chart(document.getElementById('donutReal'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Rend. Normal', 'Alto Rend.'],
-    datasets: [{ data: [1076, 359], backgroundColor: [C0+'bb', ACCENT+'bb'], borderColor: ['#080c14'], borderWidth: 2 }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false, cutout: '65%',
-    plugins: {
-      legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 8, font: { size: 10 } } },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.raw} (${((ctx.raw/1435)*100).toFixed(1)}%)` } }
-    }
-  }
-});
+// ──────────────────────────────────
+// TAB NAVIGATION
+// ──────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
 
-// ── 4. DONUT PREDICHO ──
-new Chart(document.getElementById('donutPred'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Rend. Normal', 'Alto Rend.'],
-    datasets: [{ data: [1089, 346], backgroundColor: [C1+'bb', ACCENT3+'bb'], borderColor: ['#080c14'], borderWidth: 2 }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false, cutout: '65%',
-    plugins: {
-      legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 8, font: { size: 10 } } },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.raw} (${((ctx.raw/1435)*100).toFixed(1)}%)` } }
-    }
-  }
-});
+// ──────────────────────────────────
+// SLIDER SYNC
+// ──────────────────────────────────
+const FMT = {
+  matches: v => (+v).toLocaleString('es-CL'),
+  winratio: v => (+v).toFixed(2),
+  kpm: v => (+v).toFixed(2),
+  minutes: v => (+v).toLocaleString('es-CL'),
+  kills: v => (+v).toLocaleString('es-CL'),
+  mpm: v => (+v).toFixed(1),
+};
 
-// ── 5. CLUSTER WIN RATIO ──
-new Chart(document.getElementById('clusterChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Cluster 0\nActiv. normal/alta', 'Cluster 0\nBajo engagement', 'Cluster 1\nActiv. normal/alta', 'Cluster 1\nBajo engagement'],
-    datasets: [{
-      label: 'Win Ratio Promedio (%)',
-      data: [5.17, 5.95, 12.39, 12.56],
-      backgroundColor: [C0+'99', C0+'cc', C1+'99', C1+'cc'],
-      borderColor: [C0, C0, C1, C1],
-      borderWidth: 1,
-      borderRadius: 6,
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
-      y: { grid: { color: '#1e2d45' }, ticks: { color: '#64748b', callback: v => v + '%' }, beginAtZero: true }
-    }
-  }
-});
+function syncField(name, val) {
+  document.getElementById('v-' + name).textContent = FMT[name](val);
+}
 
-// ── 6. KILLS POR PARTIDA ──
-new Chart(document.getElementById('killsChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Alto rendimiento', 'Rendimiento normal'],
-    datasets: [{
-      label: 'Kills promedio / partida',
-      data: [2.80, 1.69],
-      backgroundColor: [ACCENT + 'cc', ACCENT2 + 'cc'],
-      borderColor: [ACCENT, ACCENT2],
-      borderWidth: 1,
-      borderRadius: 8,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { grid: { color: '#1e2d45' }, ticks: { color: '#64748b' }, beginAtZero: true },
-      y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-    }
-  }
-});
+// ──────────────────────────────────
+// PREDICTION MODEL
+// ──────────────────────────────────
+// Coefficients from linear regression computed on the dataset:
+// predicted_kills = 43245.19
+//   + 0.8824*(matches - 22933.23)
+//   + 2167.78*(winratio - 7.61)
+//   + 16018.83*(kpm - 1.96)
+//   + (-0.0449)*(minutes - 155521.87)
+//
+// Cluster: if winratio >= 9.5 OR kpm >= 2.5 → Cluster 1, else Cluster 0
+// High performance: if kpm >= 2.3 AND winratio >= 9.0 → 1, else 0
+// Confidence: based on how extreme the input values are
 
-// ── 7. MINUTOS POR PERFIL ──
-new Chart(document.getElementById('minutesChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Base activa /\nrendimiento medio', 'Perfil competitivo /\nalto rendimiento'],
-    datasets: [{
-      label: 'Minutos promedio',
-      data: [160365, 145419],
-      backgroundColor: [C0 + 'cc', C1 + 'cc'],
-      borderColor: [C0, C1],
-      borderWidth: 1,
-      borderRadius: 6,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: {
-      callbacks: { label: ctx => ` ${ctx.raw.toLocaleString()} min (~${Math.round(ctx.raw/60)} hrs)` }
-    }},
-    scales: {
-      x: { grid: { color: '#1e2d45' }, ticks: { color: '#64748b', callback: v => (v/1000).toFixed(0)+'k' } },
-      y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
-    }
-  }
-});
+function runPrediction() {
+  const matches  = +document.getElementById('r-matches').value;
+  const winratio = +document.getElementById('r-winratio').value;
+  const kpm      = +document.getElementById('r-kpm').value;
+  const minutes  = +document.getElementById('r-minutes').value;
+  const kills    = +document.getElementById('r-kills').value;
+  const mpm      = +document.getElementById('r-mpm').value;
 
-// ── 8. MATRIZ ENGAGEMENT × RENDIMIENTO ──
-new Chart(document.getElementById('matrizChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Activ. normal/alta\n× Alto rend.', 'Activ. normal/alta\n× Rend. normal', 'Bajo engagement\n× Alto rend.', 'Bajo engagement\n× Rend. normal'],
-    datasets: [{
-      label: 'Score Promedio',
-      data: [47341982, 33178530, 47341982, 33178530],
-      backgroundColor: [ACCENT+'cc', C0+'88', ACCENT2+'cc', C0+'55'],
-      borderColor: [ACCENT, C0, ACCENT2, C0],
-      borderWidth: 1,
-      borderRadius: 6,
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: {
-      callbacks: { label: ctx => ` Score: ${(ctx.raw/1e6).toFixed(1)}M` }
-    }},
-    scales: {
-      x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
-      y: { grid: { color: '#1e2d45' }, ticks: { color: '#64748b', callback: v => (v/1e6).toFixed(0)+'M' }, beginAtZero: true }
-    }
-  }
-});
+  // 1. Predicted kills (regression)
+  const predKills = Math.max(0, Math.round(
+    43245.19
+    + 0.8824 * (matches - 22933.23)
+    + 2167.78 * (winratio - 7.61)
+    + 16018.83 * (kpm - 1.96)
+    + (-0.0449) * (minutes - 155521.87)
+  ));
+
+  // 2. Cluster assignment (K-Means proxy)
+  const isCluster1 = winratio >= 9.5 || (kpm >= 2.4 && winratio >= 7.0);
+  const cluster = isCluster1 ? '1' : '0';
+  const perfilLabel = isCluster1
+    ? 'Perfil competitivo / alto rendimiento'
+    : 'Base activa / rendimiento medio';
+
+  // 3. High performance classifier
+  const isHighPerf = kpm >= 2.3 && winratio >= 9.0;
+  const highPerfLabel = isHighPerf ? 'Alto rendimiento' : 'Rendimiento normal';
+
+  // 4. Engagement
+  const engagement = (matches / (minutes / 60)) >= 3 ? 'Actividad normal/alta' : 'Bajo engagement';
+
+  // 5. Confidence (0-100) based on key indicators
+  const kpmNorm  = Math.min((kpm / 5.2), 1);
+  const wrNorm   = Math.min((winratio / 20), 1);
+  const conf = Math.round(55 + kpmNorm * 25 + wrNorm * 20);
+  const confPct  = Math.min(conf, 95);
+
+  // 6. Build result HTML
+  const resDiv = document.getElementById('pred-results');
+
+  // percentile approx
+  const killPctile = Math.round(Math.min(99, Math.max(1,
+    ((predKills - 4420) / (120916 - 4420)) * 100
+  )));
+
+  resDiv.innerHTML = `
+    <div class="result-card highlighted">
+      <h3>Kills Predichas por el Modelo</h3>
+      <div class="result-main">
+        <div class="result-value">${predKills.toLocaleString('es-CL')}</div>
+        <div class="result-unit">kills totales</div>
+      </div>
+      <div class="result-sub">Percentil aproximado: top ${100-killPctile}% del dataset</div>
+      <div class="conf-wrap">
+        <div class="conf-label"><span>Confianza del modelo</span><span>${confPct}%</span></div>
+        <div class="conf-track"><div class="conf-fill" style="width:${confPct}%"></div></div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <h3>Perfil de Cluster Asignado</h3>
+      <div class="profile-badge ${isCluster1 ? 'competitive' : 'base'}">
+        Cluster ${cluster} — ${perfilLabel}
+      </div>
+      <div class="result-sub">
+        ${isCluster1
+          ? `Win ratio de ${winratio.toFixed(1)}% y ${kpm.toFixed(2)} kills/partida indican un perfil competitivo. Este jugador probablemente pertenece al 32,4% de alto rendimiento del dataset.`
+          : `El perfil indica actividad regular sin marcadores de alto rendimiento. Candidato para estrategias de mejora de engagement y retencion.`
+        }
+      </div>
+    </div>
+
+    <div class="result-card">
+      <h3>Clasificacion de Rendimiento</h3>
+      <span class="perf-indicator ${isHighPerf ? 'perf-high' : 'perf-normal'}">${highPerfLabel}</span>
+      <span class="perf-indicator perf-normal" style="color:var(--fn-ice);border-color:rgba(168,216,240,0.25);background:rgba(168,216,240,0.08)">${engagement}</span>
+      <div class="mini-bars">
+        <div class="mini-bar-row">
+          <span class="mini-bar-label">Win Ratio</span>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(winratio/20*100).toFixed(0)}%"></div></div>
+          <span class="mini-bar-val">${winratio.toFixed(1)}%</span>
+        </div>
+        <div class="mini-bar-row">
+          <span class="mini-bar-label">Kills/Partida</span>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(kpm/5.2*100).toFixed(0)}%"></div></div>
+          <span class="mini-bar-val">${kpm.toFixed(2)}</span>
+        </div>
+        <div class="mini-bar-row">
+          <span class="mini-bar-label">Min/Partida</span>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${((mpm-3.3)/11.3*100).toFixed(0)}%"></div></div>
+          <span class="mini-bar-val">${mpm.toFixed(1)}</span>
+        </div>
+        <div class="mini-bar-row">
+          <span class="mini-bar-label">Actividad</span>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${((matches-8424)/(59573-8424)*100).toFixed(0)}%"></div></div>
+          <span class="mini-bar-val">${(matches/1000).toFixed(1)}k</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
 </script>
 </body>
 </html>
